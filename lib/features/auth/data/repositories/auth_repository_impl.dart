@@ -49,24 +49,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
       try {
         var profile = await remoteDataSource.getUserProfile(user.id);
-        
-        if (profile == null) {
-          print('====== Profile not found, creating new profile ======');
-          profile = await remoteDataSource.createUserProfile(
-            userId: user.id,
-            email: user.email ?? '',
-            name: user.userMetadata?['full_name'] ?? user.userMetadata?['name'],
-            avatarUrl: user.userMetadata?['avatar_url'],
-          );
-        }
-
         print('====== DEBUG AUTH ======');
-        print('Fetched/Created Profile for ${user.id}: $profile');
+        print('Fetched Profile for ${user.id}: $profile');
         print('Role from Profile: ${profile?['role']}');
 
         return UserModel.fromSupabase(user, profile);
       } catch (e, stackTrace) {
+        // Print the error so we can debug why profile creation/fetching failed
         print('Error in authStateChanges: $e\n$stackTrace');
+        // Fallback to minimal user entity if profile fetch/create fails
         return UserModel.fromSupabase(user, null);
       }
     });

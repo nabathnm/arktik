@@ -35,11 +35,6 @@ import 'features/destination/domain/usecases/get_destinations.dart';
 import 'features/destination/domain/usecases/update_destination.dart';
 import 'features/destination/presentation/providers/destination_provider.dart';
 
-import 'features/admin/data/datasources/admin_remote_datasource.dart';
-import 'features/admin/data/repositories/admin_repository_impl.dart';
-import 'features/admin/domain/repositories/admin_repository.dart';
-import 'features/admin/presentation/providers/admin_destination_provider.dart';
-
 import 'features/trip/data/datasources/invitation_remote_datasource.dart';
 import 'features/trip/data/repositories/invitation_repository_impl.dart';
 import 'features/trip/domain/repositories/invitation_repository.dart';
@@ -103,11 +98,6 @@ class Config {
   late final UpdateDestination updateDestination;
   late final DeleteDestination deleteDestination;
   late final DestinationProvider destinationProvider;
-
-  // New Admin (Destination Management)
-  late final AdminRemoteDataSource adminRemoteDataSource;
-  late final AdminRepository adminRepository;
-  late final AdminDestinationProvider adminDestinationProvider;
 
   // Invitation
   late final InvitationRemoteDataSource invitationRemoteDataSource;
@@ -198,10 +188,6 @@ class Config {
     destinationProvider = DestinationProvider(
       repository: destinationRepository,
     );
-
-    adminRemoteDataSource = AdminRemoteDataSourceImpl(supabase);
-    adminRepository = AdminRepositoryImpl(adminRemoteDataSource);
-    adminDestinationProvider = AdminDestinationProvider(adminRepository);
 
     // Invitation Initialization
     invitationRemoteDataSource = InvitationRemoteDataSourceImpl(supabase);

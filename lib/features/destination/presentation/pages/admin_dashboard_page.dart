@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/destination_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -62,27 +61,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildStatCard(
-                          'Active Destinations',
-                          destProvider.destinations.where((d) => d.isActive).length.toString(),
-                          Colors.green,
-                        ),
-                      ),
                     ],
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => context.push('/admin/destinations'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Kelola Destinasi'),
-                    ),
                   ),
                 ],
               ),
