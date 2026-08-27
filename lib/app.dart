@@ -8,6 +8,7 @@ import 'features/google_calendar/presentation/providers/google_calendar_provider
 import 'features/destination/presentation/providers/destination_provider.dart';
 import 'features/trip/presentation/pages/invitation_provider.dart';
 import 'features/trip/presentation/providers/trip_provider.dart';
+import 'features/trip/presentation/providers/schedule_matching_provider.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -30,6 +31,9 @@ class App extends StatelessWidget {
           value: config.invitationProvider,
         ),
         ChangeNotifierProvider<TripProvider>.value(value: config.tripProvider),
+        ChangeNotifierProvider<ScheduleMatchingProvider>.value(
+          value: config.scheduleMatchingProvider,
+        ),
       ],
       child: MaterialApp.router(
         title: 'Schedule Matchmaking',

@@ -50,16 +50,24 @@ import 'features/trip/data/datasources/trip_remote_data_source.dart';
 import 'features/trip/data/repositories/trip_repository_impl.dart';
 import 'features/trip/domain/repositories/trip_repository.dart';
 import 'features/trip/domain/usecases/create_trip_usecase.dart';
-import 'features/trip/domain/usecases/get_my_trips_usecase.dart';
-import 'features/trip/domain/usecases/get_trip_members_usecase.dart';
-import 'features/trip/domain/usecases/get_trip_leader_usecase.dart';
-import 'features/trip/domain/usecases/get_my_membership_usecase.dart';
-import 'features/trip/domain/usecases/get_trip_by_id_usecase.dart';
-import 'features/trip/domain/usecases/remove_trip_member_usecase.dart';
-import 'features/trip/domain/usecases/leave_trip_usecase.dart';
 import 'features/trip/domain/usecases/delete_trip_usecase.dart';
+import 'features/trip/domain/usecases/get_my_membership_usecase.dart';
+import 'features/trip/domain/usecases/get_my_trips_usecase.dart';
+import 'features/trip/domain/usecases/get_trip_by_id_usecase.dart';
+import 'features/trip/domain/usecases/get_trip_leader_usecase.dart';
+import 'features/trip/domain/usecases/get_trip_members_usecase.dart';
+import 'features/trip/domain/usecases/leave_trip_usecase.dart';
+import 'features/trip/domain/usecases/remove_trip_member_usecase.dart';
+import 'features/trip/domain/usecases/add_destination_to_trip_usecase.dart';
+import 'features/trip/domain/usecases/get_trip_itineraries_usecase.dart';
+import 'features/trip/domain/usecases/remove_destination_from_trip_usecase.dart';
 import 'features/trip/presentation/providers/trip_provider.dart';
 
+import 'features/trip/domain/repositories/schedule_matching_repository.dart';
+import 'features/trip/data/repositories/schedule_matching_repository_impl.dart';
+import 'features/trip/domain/usecases/find_available_dates_usecase.dart';
+import 'features/trip/domain/usecases/select_trip_date_usecase.dart';
+import 'features/trip/presentation/providers/schedule_matching_provider.dart';
 class Config {
   Config();
 
@@ -89,6 +97,7 @@ class Config {
   late final UpdateCalendarEvent updateCalendarEvent;
   late final DeleteCalendarEvent deleteCalendarEvent;
   late final GetAvailability getAvailability;
+  late final SyncSchedulesToDatabase syncSchedulesToDatabase;
   late final GoogleCalendarProvider googleCalendarProvider;
   late final AvailabilityProvider availabilityProvider;
 
@@ -123,6 +132,12 @@ class Config {
   late final LeaveTripUseCase leaveTripUseCase;
   late final DeleteTripUseCase deleteTripUseCase;
   late final TripProvider tripProvider;
+
+  // Schedule Matching
+  late final ScheduleMatchingRepository scheduleMatchingRepository;
+  late final FindAvailableDatesUseCase findAvailableDatesUseCase;
+  late final SelectTripDateUseCase selectTripDateUseCase;
+  late final ScheduleMatchingProvider scheduleMatchingProvider;
 
   Future<void> init() async {
     supabase = Supabase.instance.client;
@@ -163,19 +178,21 @@ class Config {
 
     // Google Calendar Initialization
     calendarRemoteDataSource = GoogleCalendarRemoteDataSourceImpl(googleSignIn);
-    calendarRepository = GoogleCalendarRepositoryImpl(calendarRemoteDataSource);
+    calendarRepository = GoogleCalendarRepositoryImpl(calendarRemoteDataSource, supabase);
 
     getCalendarEvents = GetCalendarEvents(calendarRepository);
     createCalendarEvent = CreateCalendarEvent(calendarRepository);
     updateCalendarEvent = UpdateCalendarEvent(calendarRepository);
     deleteCalendarEvent = DeleteCalendarEvent(calendarRepository);
     getAvailability = GetAvailability(calendarRepository);
+    syncSchedulesToDatabase = SyncSchedulesToDatabase(calendarRepository);
 
     googleCalendarProvider = GoogleCalendarProvider(
       getEvents: getCalendarEvents,
       createEvent: createCalendarEvent,
       updateEvent: updateCalendarEvent,
       deleteEvent: deleteCalendarEvent,
+      syncSchedules: syncSchedulesToDatabase,
     );
 
     availabilityProvider = AvailabilityProvider(getAvailability);
@@ -222,6 +239,9 @@ class Config {
     removeTripMemberUseCase = RemoveTripMemberUseCase(tripRepository);
     leaveTripUseCase = LeaveTripUseCase(tripRepository);
     deleteTripUseCase = DeleteTripUseCase(tripRepository);
+    final addDestinationToTripUseCase = AddDestinationToTripUseCase(tripRepository);
+    final getTripItinerariesUseCase = GetTripItinerariesUseCase(tripRepository);
+    final removeDestinationFromTripUseCase = RemoveDestinationFromTripUseCase(tripRepository);
 
     tripProvider = TripProvider(
       createTripUseCase: createTripUseCase,
@@ -233,6 +253,23 @@ class Config {
       removeTripMemberUseCase: removeTripMemberUseCase,
       leaveTripUseCase: leaveTripUseCase,
       deleteTripUseCase: deleteTripUseCase,
+      addDestinationToTripUseCase: addDestinationToTripUseCase,
+      getTripItinerariesUseCase: getTripItinerariesUseCase,
+      removeDestinationFromTripUseCase: removeDestinationFromTripUseCase,
+    );
+
+    // Schedule Matching Initialization
+    scheduleMatchingRepository = ScheduleMatchingRepositoryImpl(
+      supabase,
+      tripRepository,
+      calendarRepository,
+    );
+    findAvailableDatesUseCase = FindAvailableDatesUseCase(scheduleMatchingRepository);
+    selectTripDateUseCase = SelectTripDateUseCase(scheduleMatchingRepository);
+    
+    scheduleMatchingProvider = ScheduleMatchingProvider(
+      findAvailableDatesUseCase: findAvailableDatesUseCase,
+      selectTripDateUseCase: selectTripDateUseCase,
     );
   }
 }

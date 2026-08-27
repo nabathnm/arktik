@@ -40,3 +40,13 @@ class DeleteCalendarEvent {
     return repository.deleteEvent(eventId: eventId);
   }
 }
+
+class SyncSchedulesToDatabase {
+  final GoogleCalendarRepository repository;
+
+  SyncSchedulesToDatabase(this.repository);
+
+  Future<void> call() async {
+    return repository.syncSchedulesToDatabase();
+  }
+}

@@ -32,34 +32,40 @@ class _BerandaPageState extends State<BerandaPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header & Action Cards
-            _buildHeaderAndCards(context, firstName, avatarUrl),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await context.read<TripProvider>().fetchMyTrips();
+          await context.read<DestinationProvider>().fetchDestinations();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header & Action Cards
+              _buildHeaderAndCards(context, firstName, avatarUrl),
 
-            // Spacing for overlapping cards (Stack height is 300, cards go down to 360)
-            const SizedBox(height: 80),
+              SizedBox(height: 56),
 
-            // Trip Saya
-            _buildSectionHeader(
-              'Trip Saya',
-              () => context.go('/user/my-trips'),
-            ),
-            _buildMyTripsList(context),
+              // Trip Saya
+              _buildSectionHeader(
+                'Trip Saya',
+                () => context.go('/user/my-trips'),
+              ),
+              _buildMyTripsList(context),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Rekomendasi Trip populer
-            _buildSectionHeader(
-              'Rekomendasi Trip populer',
-              () => context.go('/user/explore'),
-            ),
-            _buildPopularDestinations(context),
+              // Rekomendasi Trip populer
+              _buildSectionHeader(
+                'Rekomendasi Trip\nPopuler',
+                () => context.go('/user/explore'),
+              ),
+              _buildPopularDestinations(context),
 
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -74,95 +80,91 @@ class _BerandaPageState extends State<BerandaPage> {
       clipBehavior: Clip.none,
       children: [
         // Curved Violet Background
-        ClipPath(
-          clipper: _HeaderClipper(),
-          child: Container(
-            height: 300,
-            width: double.infinity,
+        Container(
+          height: 296,
+          width: double.infinity,
+          decoration: BoxDecoration(
             color: AppColors.primary,
-            padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Logo Text Placeholder (Arktik)
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.flight_takeoff,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Arktik',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Notification & Avatar
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.notifications,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {},
-                        ),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white,
-                          backgroundImage: avatarUrl != null
-                              ? NetworkImage(avatarUrl)
-                              : null,
-                          child: avatarUrl == null
-                              ? const Icon(
-                                  Icons.person,
-                                  color: AppColors.primary,
-                                )
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      height: 1.2,
-                    ),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.only(top: 20, left: 24, right: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
                     children: [
-                      const TextSpan(text: 'Halo, '),
-                      TextSpan(
-                        text: '$firstName!\n',
-                        style: const TextStyle(
-                          color: AppColors.yellowNormal,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Image.asset(
+                        "assets/images/splash/bird.png",
+                        height: 30,
+                        width: 40,
                       ),
-                      const TextSpan(text: 'Siap menjelajah Dunia?'),
+                      Image.asset(
+                        "assets/images/splash/arktik.png",
+                        height: 40,
+                        width: 50,
+                      ),
                     ],
                   ),
+                  // Notification & Avatar
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {},
+                      ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                        backgroundImage: avatarUrl != null
+                            ? NetworkImage(avatarUrl)
+                            : null,
+                        child: avatarUrl == null
+                            ? const Icon(Icons.person, color: AppColors.primary)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                  children: [
+                    const TextSpan(text: 'Halo, '),
+                    TextSpan(
+                      text: '$firstName!\n',
+                      style: const TextStyle(
+                        color: AppColors.yellowNormal,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const TextSpan(text: 'Siap menjelajah Dunia?'),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
 
         // Action Cards Overlapping
         Positioned(
-          top: 220, // Overlap bottom edge
+          top: 150,
           left: 24,
           right: 24,
           child: Row(
@@ -170,7 +172,7 @@ class _BerandaPageState extends State<BerandaPage> {
               Expanded(
                 child: _buildActionCard(
                   title: 'Buat\nTrip',
-                  icon: Icons.add_circle,
+                  imagePath: 'assets/images/icon/buat_trip.png',
                   color: AppColors.yellowNormal,
                   textColor: Colors.white,
                   onTap: () => context.push('/user/create-trip'),
@@ -180,7 +182,7 @@ class _BerandaPageState extends State<BerandaPage> {
               Expanded(
                 child: _buildActionCard(
                   title: 'Join Trip',
-                  icon: Icons.group_add,
+                  imagePath: 'assets/images/icon/join_trip.png',
                   color: const Color(0xff6b6eb2), // A lighter blue/violet
                   textColor: Colors.white,
                   onTap: () => context.push('/user/join-invitation'),
@@ -195,7 +197,7 @@ class _BerandaPageState extends State<BerandaPage> {
 
   Widget _buildActionCard({
     required String title,
-    required IconData icon,
+    required String imagePath,
     required Color color,
     required Color textColor,
     required VoidCallback onTap,
@@ -203,7 +205,8 @@ class _BerandaPageState extends State<BerandaPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 140,
+        height: 179,
+        width: 160,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(24),
@@ -229,7 +232,7 @@ class _BerandaPageState extends State<BerandaPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Icon(icon, color: textColor, size: 36),
+            Image.asset(imagePath, width: 64, height: 64),
           ],
         ),
       ),
@@ -247,7 +250,8 @@ class _BerandaPageState extends State<BerandaPage> {
               title,
               style: const TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
+                height: 1,
+                fontWeight: FontWeight.w900,
                 color: Colors.black,
               ),
             ),
@@ -255,7 +259,7 @@ class _BerandaPageState extends State<BerandaPage> {
           InkWell(
             onTap: onSeeAll,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(16),
@@ -274,7 +278,8 @@ class _BerandaPageState extends State<BerandaPage> {
   Widget _buildMyTripsList(BuildContext context) {
     return Consumer<TripProvider>(
       builder: (context, provider, _) {
-        if (provider.status == TripStateStatus.loading) {
+        if (provider.status == TripStateStatus.loading &&
+            provider.myTrips.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(32.0),
             child: Center(child: CircularProgressIndicator()),
@@ -306,44 +311,126 @@ class _BerandaPageState extends State<BerandaPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.card_travel,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          trip.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ClipRRect untuk gambar destinasi
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=150&q=80', // Placeholder Statue of Liberty / America
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                width: 80,
+                                height: 80,
+                                color: Colors.grey.shade300,
+                                child: const Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                ),
+                              ),
                         ),
-                        const SizedBox(height: 4),
+                      ),
+                      const SizedBox(width: 16),
+                      // Detail Trip
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              trip.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Date format placeholder (idealnya dari trip.startDate)
+                            Text(
+                              '13 - 16 April 2026', // Sesuai referensi
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Badge Hari
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF8FB1E9,
+                                ), // Warna biru badge
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                '3 Hari',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Progress Text
+                  RichText(
+                    text: const TextSpan(
+                      style: TextStyle(fontSize: 12, color: Colors.black87),
+                      children: [
+                        TextSpan(text: 'Progres: '),
+                        TextSpan(
+                          text: '0% Selesai',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Progress Bar Custom
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Container(
+                        height: 8,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        height: 8,
+                        width:
+                            16, // Progres 0% tapi ada indikator kuning sedikit sesuai referensi
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFDE047), // Warna kuning
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -357,7 +444,8 @@ class _BerandaPageState extends State<BerandaPage> {
   Widget _buildPopularDestinations(BuildContext context) {
     return Consumer<DestinationProvider>(
       builder: (context, provider, _) {
-        if (provider.state == DestinationState.loading) {
+        if (provider.state == DestinationState.loading &&
+            provider.destinations.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(32.0),
             child: Center(child: CircularProgressIndicator()),
@@ -395,9 +483,9 @@ class _BerandaPageState extends State<BerandaPage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -457,37 +545,4 @@ class _BerandaPageState extends State<BerandaPage> {
       },
     );
   }
-}
-
-class _HeaderClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height - 50);
-
-    var firstControlPoint = Offset(size.width / 4, size.height);
-    var firstEndPoint = Offset(size.width / 2, size.height);
-    path.quadraticBezierTo(
-      firstControlPoint.dx,
-      firstControlPoint.dy,
-      firstEndPoint.dx,
-      firstEndPoint.dy,
-    );
-
-    var secondControlPoint = Offset(size.width - (size.width / 4), size.height);
-    var secondEndPoint = Offset(size.width, size.height - 50);
-    path.quadraticBezierTo(
-      secondControlPoint.dx,
-      secondControlPoint.dy,
-      secondEndPoint.dx,
-      secondEndPoint.dy,
-    );
-
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

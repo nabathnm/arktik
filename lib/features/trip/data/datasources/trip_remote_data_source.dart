@@ -1,15 +1,18 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../../domain/entities/trip_member_entity.dart';
 import '../../domain/entities/trip_summary_entity.dart';
+import '../../domain/entities/trip_itinerary_entity.dart';
+import '../../../destination/domain/entities/destination_entity.dart';
 
 abstract class TripRemoteDataSource {
   Future<TripEntity> createTrip({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   });
 
@@ -31,6 +34,18 @@ abstract class TripRemoteDataSource {
   });
 
   Future<void> deleteTrip(String tripId);
+
+  Future<List<TripItineraryEntity>> getTripItineraries(String tripId);
+
+  Future<TripItineraryEntity> addDestinationToTrip({
+    required String tripId,
+    required String destinationId,
+    required DateTime visitDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  });
+
+  Future<void> removeDestinationFromTrip(String itineraryId);
 }
 
 class TripRemoteDataSourceImpl implements TripRemoteDataSource {
@@ -55,7 +70,12 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       case 'active':
         return TripStatus.active;
       case 'ready':
-        return TripStatus.ready;
+      case 'planning':
+        return TripStatus.planning;
+      case 'matching':
+        return TripStatus.matching;
+      case 'date_selected':
+        return TripStatus.date_selected;
       case 'completed':
         return TripStatus.completed;
       case 'cancelled':
@@ -71,9 +91,17 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       id: data['id'],
       name: data['name'],
       destinationId: data['destination_id'],
-      startDate: DateTime.parse(data['start_date']),
-      endDate: DateTime.parse(data['end_date']),
+      startDate: data['start_date'] != null
+          ? DateTime.parse(data['start_date'])
+          : null,
+      endDate: data['end_date'] != null
+          ? DateTime.parse(data['end_date'])
+          : null,
+      selectedDate: data['selected_date'] != null
+          ? DateTime.parse(data['selected_date'])
+          : null,
       type: _parseType(data['type']),
+      status: _parseStatus(data['status'] ?? 'draft'),
       createdBy: data['created_by'],
       createdAt: DateTime.parse(data['created_at']),
     );
@@ -83,26 +111,31 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
   Future<TripEntity> createTrip({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   }) async {
+    final Map<String, dynamic> insertData = {
+      'name': name,
+      'destination_id': destinationId,
+      'type': type.name,
+      'created_by': supabaseClient.auth.currentUser!.id,
+      'status': 'draft', // or matching depending on logic
+    };
+
+    if (startDate != null) {
+      insertData['start_date'] = startDate.toIso8601String().split('T')[0];
+    }
+    if (endDate != null) {
+      insertData['end_date'] = endDate.toIso8601String().split('T')[0];
+    }
+
     final response = await supabaseClient
         .from('trips')
-        .insert({
-          'name': name,
-          'destination_id': destinationId,
-          'start_date': startDate.toIso8601String().split('T')[0],
-          'end_date': endDate.toIso8601String().split('T')[0],
-          'type': type.name,
-          'created_by': supabaseClient.auth.currentUser!.id,
-        })
+        .insert(insertData)
         .select()
         .single();
 
-    // After creating a trip, we also need to add the creator to trip_members as owner.
-    // However, we can handle it at the database layer using a trigger, or do it here manually.
-    // Let's do it manually here for simplicity to ensure they are joined.
     final tripId = response['id'];
 
     await supabaseClient.from('trip_members').insert({
@@ -132,7 +165,12 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       await supabaseClient.from('invitations').insert({
         'code': code,
         'max_members': 100,
-        'expires_at': endDate.toUtc().toIso8601String(),
+        'expires_at': endDate != null
+            ? endDate.toUtc().toIso8601String()
+            : DateTime.now()
+                  .add(const Duration(days: 30))
+                  .toUtc()
+                  .toIso8601String(),
         'trip_id': tripId,
       });
     }
@@ -152,6 +190,8 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
             name,
             start_date,
             end_date,
+            selected_date,
+            status,
             destinations (
               name
             ),
@@ -174,17 +214,23 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
     final summaries = (response as List).map((row) {
       final myRoleStr = row['role'] as String;
       final trip = row['trips'] as Map<String, dynamic>;
-      
+
       final destinations = trip['destinations'];
-      final destinationName = (destinations is Map) ? destinations['name'] as String? : null;
-      
-      final allMembers = (trip['trip_members'] as List?)?.where((m) => m['status'] == 'active').toList() ?? [];
+      final destinationName = (destinations is Map)
+          ? destinations['name'] as String?
+          : null;
+
+      final allMembers =
+          (trip['trip_members'] as List?)
+              ?.where((m) => m['status'] == 'active')
+              .toList() ??
+          [];
       final leader = allMembers.firstWhere(
         (m) => m['role'] == 'owner',
         orElse: () => <String, dynamic>{},
       );
       final profiles = leader['profiles'];
-      
+
       final invitations = trip['invitations'];
       String? code;
       if (invitations is List && invitations.isNotEmpty) {
@@ -197,9 +243,19 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
         id: trip['id'],
         name: trip['name'],
         destinationName: destinationName,
-        startDate: DateTime.parse(trip['start_date']),
-        endDate: DateTime.parse(trip['end_date']),
-        myRole: myRoleStr == 'owner' ? TripMemberRole.owner : TripMemberRole.member,
+        startDate: trip['start_date'] != null
+            ? DateTime.parse(trip['start_date'])
+            : null,
+        endDate: trip['end_date'] != null
+            ? DateTime.parse(trip['end_date'])
+            : null,
+        selectedDate: trip['selected_date'] != null
+            ? DateTime.parse(trip['selected_date'])
+            : null,
+        status: _parseStatus(trip['status'] ?? 'draft'),
+        myRole: myRoleStr == 'owner'
+            ? TripMemberRole.owner
+            : TripMemberRole.member,
         leaderName: profiles != null ? profiles['name'] : null,
         leaderAvatarUrl: profiles != null ? profiles['avatar_url'] : null,
         memberCount: allMembers.length,
@@ -207,7 +263,11 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       );
     }).toList();
 
-    summaries.sort((a, b) => a.startDate.compareTo(b.startDate));
+    summaries.sort((a, b) {
+      final aDate = a.selectedDate ?? a.startDate ?? DateTime.now();
+      final bDate = b.selectedDate ?? b.startDate ?? DateTime.now();
+      return aDate.compareTo(bDate);
+    });
     return summaries;
   }
 
@@ -285,12 +345,31 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
   @override
   Future<void> deleteTrip(String tripId) async {
     // Delete related records first to avoid foreign key constraint errors
+    // Order matters here! Delete trip_members last so RLS policies on other tables
+    // that check for trip membership don't fail.
+    await supabaseClient.from('invitations').delete().eq('trip_id', tripId);
+    await supabaseClient
+        .from('trip_schedule_candidates')
+        .delete()
+        .eq('trip_id', tripId);
+    await supabaseClient
+        .from('trip_itineraries')
+        .delete()
+        .eq('trip_id', tripId);
     await supabaseClient.from('trip_members').delete().eq('trip_id', tripId);
 
-    await supabaseClient.from('invitations').delete().eq('trip_id', tripId);
+    // Then delete the trip and return the deleted rows to verify
+    final deletedTrips = await supabaseClient
+        .from('trips')
+        .delete()
+        .eq('id', tripId)
+        .select();
 
-    // Then delete the trip
-    await supabaseClient.from('trips').delete().eq('id', tripId);
+    if (deletedTrips.isEmpty) {
+      throw Exception(
+        'Gagal menghapus trip di database. Pastikan kebijakan RLS (Row Level Security) di Supabase mengizinkan operasi DELETE untuk tabel trips dan relasinya.',
+      );
+    }
   }
 
   TripMemberEntity _mapToTripMemberEntity(Map<String, dynamic> data) {
@@ -305,5 +384,139 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       name: data['profiles']?['name'],
       avatarUrl: data['profiles']?['avatar_url'],
     );
+  }
+
+  TimeOfDay? _parseTime(String? timeStr) {
+    if (timeStr == null) return null;
+    try {
+      final parts = timeStr.split(':');
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _formatTime(TimeOfDay? time) {
+    if (time == null) return null;
+    final h = time.hour.toString().padLeft(2, '0');
+    final m = time.minute.toString().padLeft(2, '0');
+    return '$h:$m:00';
+  }
+
+  @override
+  Future<List<TripItineraryEntity>> getTripItineraries(String tripId) async {
+    final response = await supabaseClient
+        .from('trip_itineraries')
+        .select('*, destinations(*)')
+        .eq('trip_id', tripId)
+        .order('order_index', ascending: true);
+
+    return (response as List).map((row) {
+      final destData = row['destinations'];
+      DestinationEntity? destination;
+      if (destData != null) {
+        DestinationType parsedType = DestinationType.tourism;
+        if (destData['type'] == 'culinary')
+          parsedType = DestinationType.culinary;
+
+        destination = DestinationEntity(
+          id: destData['id'],
+          name: destData['name'],
+          description: destData['description'],
+          location: destData['location'],
+          type: parsedType,
+          imageUrl: destData['image_url'],
+          createdBy: destData['created_by'],
+        );
+      }
+
+      return TripItineraryEntity(
+        id: row['id'],
+        tripId: row['trip_id'],
+        destinationId: row['destination_id'],
+        destination: destination,
+        visitDate: DateTime.parse(row['visit_date']),
+        startTime: _parseTime(row['start_time']),
+        endTime: _parseTime(row['end_time']),
+        orderIndex: row['order_index'] ?? 0,
+        createdAt: DateTime.parse(row['created_at']),
+      );
+    }).toList();
+  }
+
+  @override
+  Future<TripItineraryEntity> addDestinationToTrip({
+    required String tripId,
+    required String destinationId,
+    required DateTime visitDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  }) async {
+    // Get current max order_index
+    final maxOrderResponse = await supabaseClient
+        .from('trip_itineraries')
+        .select('order_index')
+        .eq('trip_id', tripId)
+        .eq('visit_date', visitDate.toIso8601String().split('T')[0])
+        .order('order_index', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    int nextOrderIndex = 0;
+    if (maxOrderResponse != null && maxOrderResponse['order_index'] != null) {
+      nextOrderIndex = (maxOrderResponse['order_index'] as int) + 1;
+    }
+
+    final insertData = {
+      'trip_id': tripId,
+      'destination_id': destinationId,
+      'visit_date': visitDate.toIso8601String().split('T')[0],
+      'start_time': _formatTime(startTime),
+      'end_time': _formatTime(endTime),
+      'order_index': nextOrderIndex,
+    };
+
+    final response = await supabaseClient
+        .from('trip_itineraries')
+        .insert(insertData)
+        .select('*, destinations(*)')
+        .single();
+
+    final destData = response['destinations'];
+    DestinationEntity? destination;
+    if (destData != null) {
+      DestinationType parsedType = DestinationType.tourism;
+      if (destData['type'] == 'culinary') parsedType = DestinationType.culinary;
+
+      destination = DestinationEntity(
+        id: destData['id'],
+        name: destData['name'],
+        description: destData['description'],
+        location: destData['location'],
+        type: parsedType,
+        imageUrl: destData['image_url'],
+        createdBy: destData['created_by'],
+      );
+    }
+
+    return TripItineraryEntity(
+      id: response['id'],
+      tripId: response['trip_id'],
+      destinationId: response['destination_id'],
+      destination: destination,
+      visitDate: DateTime.parse(response['visit_date']),
+      startTime: _parseTime(response['start_time']),
+      endTime: _parseTime(response['end_time']),
+      orderIndex: response['order_index'] ?? 0,
+      createdAt: DateTime.parse(response['created_at']),
+    );
+  }
+
+  @override
+  Future<void> removeDestinationFromTrip(String itineraryId) async {
+    await supabaseClient
+        .from('trip_itineraries')
+        .delete()
+        .eq('id', itineraryId);
   }
 }

@@ -214,6 +214,19 @@ class LivestTypography {
     fontWeight: FontWeight.w600,
   );
 
+  // ───────────────── NAVBAR ─────────────────
+  static const TextStyle navBarSelected = TextStyle(
+    fontFamily: _font,
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle navBarUnselected = TextStyle(
+    fontFamily: _font,
+    fontSize: 10,
+    fontWeight: FontWeight.w700,
+  );
+
   // ───────────────── TEXT THEME ─────────────────
   static TextTheme get textTheme => const TextTheme(
     displayLarge: displayLg,

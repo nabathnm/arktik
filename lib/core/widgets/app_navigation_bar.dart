@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:rantau/core/constants/app_colors.dart';
+import 'package:rantau/core/constants/app_typography.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
@@ -72,16 +74,68 @@ class AppNavigationBar extends StatelessWidget {
       BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
     ];
 
-    final userItems = const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-      BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Eksplor'),
-      BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'My trip'),
-      BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+    final userItems = [
+      BottomNavigationBarItem(
+        icon: Image.asset(
+          'assets/images/navbar/beranda.png',
+          width: 24,
+          height: 24,
+        ),
+        activeIcon: Image.asset(
+          'assets/images/navbar/beranda_acrive.png',
+          width: 30,
+          height: 30,
+        ),
+        label: 'Beranda',
+      ),
+      BottomNavigationBarItem(
+        icon: Image.asset(
+          'assets/images/navbar/eksplor.png',
+          width: 24,
+          height: 24,
+        ),
+        activeIcon: Image.asset(
+          'assets/images/navbar/eksplor_active.png',
+          width: 30,
+          height: 30,
+        ),
+        label: 'Eksplor',
+      ),
+      BottomNavigationBarItem(
+        icon: Image.asset(
+          'assets/images/navbar/my_trip.png',
+          width: 24,
+          height: 24,
+        ),
+        activeIcon: Image.asset(
+          'assets/images/navbar/my_trip_active.png',
+          width: 30,
+          height: 30,
+        ),
+        label: 'My trip',
+      ),
+      BottomNavigationBarItem(
+        icon: Image.asset(
+          'assets/images/navbar/profil.png',
+          width: 24,
+          height: 24,
+        ),
+        activeIcon: Image.asset(
+          'assets/images/navbar/profil.png',
+          width: 30,
+          height: 30,
+        ),
+        label: 'Profil',
+      ),
     ];
 
     return Scaffold(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: child,
       bottomNavigationBar: Container(
+        padding: const EdgeInsets.only(top: 16, bottom: 32),
+
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: const BorderRadius.only(
@@ -98,19 +152,27 @@ class AppNavigationBar extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24.0),
-            topRight: Radius.circular(24.0),
+            topLeft: Radius.circular(15.0),
+            topRight: Radius.circular(15.0),
           ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
-            selectedItemColor: const Color(0xff2f2373), // AppColors.primary
-            unselectedItemColor: const Color(0xff52488b).withOpacity(0.5),
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            currentIndex: _calculateSelectedIndex(context, isAdmin),
-            items: isAdmin ? adminItems : userItems,
-            onTap: (index) =>
-                isAdmin ? _onAdminTap(context, index) : _onUserTap(context, index),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.white,
+              selectedItemColor: AppColors.primaryNormalActive,
+              unselectedItemColor: AppColors.primaryNormal,
+              selectedLabelStyle: LivestTypography.navBarSelected,
+              unselectedLabelStyle: LivestTypography.navBarUnselected,
+              currentIndex: _calculateSelectedIndex(context, isAdmin),
+              items: isAdmin ? adminItems : userItems,
+              onTap: (index) => isAdmin
+                  ? _onAdminTap(context, index)
+                  : _onUserTap(context, index),
+            ),
           ),
         ),
       ),

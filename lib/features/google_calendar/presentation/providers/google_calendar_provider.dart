@@ -10,6 +10,7 @@ class GoogleCalendarProvider extends ChangeNotifier {
   final CreateCalendarEvent _createEvent;
   final UpdateCalendarEvent _updateEvent;
   final DeleteCalendarEvent _deleteEvent;
+  final SyncSchedulesToDatabase _syncSchedules;
 
   CalendarStateStatus _status = CalendarStateStatus.initial;
   List<CalendarEventEntity> _events = [];
@@ -21,15 +22,32 @@ class GoogleCalendarProvider extends ChangeNotifier {
     required CreateCalendarEvent createEvent,
     required UpdateCalendarEvent updateEvent,
     required DeleteCalendarEvent deleteEvent,
+    required SyncSchedulesToDatabase syncSchedules,
   })  : _getEvents = getEvents,
         _createEvent = createEvent,
         _updateEvent = updateEvent,
-        _deleteEvent = deleteEvent;
+        _deleteEvent = deleteEvent,
+        _syncSchedules = syncSchedules;
 
   CalendarStateStatus get status => _status;
   List<CalendarEventEntity> get events => _events;
   String? get errorMessage => _errorMessage;
   bool get isConnected => _isConnected;
+
+  Future<void> syncSchedulesToDatabase() async {
+    _status = CalendarStateStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _syncSchedules();
+      _isConnected = true;
+      _status = CalendarStateStatus.loaded;
+    } catch (e) {
+      _handleError(e);
+    }
+    notifyListeners();
+  }
 
   Future<void> loadEvents() async {
     _status = CalendarStateStatus.loading;

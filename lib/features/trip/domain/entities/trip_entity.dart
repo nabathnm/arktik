@@ -2,15 +2,17 @@ import 'package:equatable/equatable.dart';
 
 enum TripType { solo, group, family }
 
-enum TripStatus { draft, active, ready, completed, cancelled }
+enum TripStatus { draft, matching, date_selected, planning, active, completed, cancelled }
 
 class TripEntity extends Equatable {
   final String id;
   final String name;
   final String? destinationId;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final DateTime? selectedDate;
   final TripType type;
+  final TripStatus status;
   final String createdBy;
   final DateTime createdAt;
 
@@ -18,9 +20,11 @@ class TripEntity extends Equatable {
     required this.id,
     required this.name,
     this.destinationId,
-    required this.startDate,
-    required this.endDate,
+    this.startDate,
+    this.endDate,
+    this.selectedDate,
     required this.type,
+    this.status = TripStatus.draft,
     required this.createdBy,
     required this.createdAt,
   });
@@ -32,7 +36,9 @@ class TripEntity extends Equatable {
     destinationId,
     startDate,
     endDate,
+    selectedDate,
     type,
+    status,
     createdBy,
     createdAt,
   ];

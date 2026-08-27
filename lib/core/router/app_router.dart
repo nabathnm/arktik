@@ -22,6 +22,8 @@ import '../../features/trip/presentation/pages/my_trips_page.dart';
 import '../../features/trip/presentation/pages/trip_detail_page.dart';
 import '../../features/trip/presentation/pages/trip_members_page.dart';
 import '../../features/trip/presentation/pages/member_detail_page.dart';
+import '../../features/trip/presentation/pages/schedule_matching_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -125,22 +127,7 @@ class AppRouter {
           GoRoute(
             path: '/user/profile',
             name: "user_profile",
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('User Profile')),
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('User Profile'),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => context.read<AuthProvider>().signOut(),
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            builder: (context, state) => const ProfilePage(),
           ),
         ],
       ),
@@ -151,6 +138,17 @@ class AppRouter {
           final id = state.pathParameters['tripId']!;
           return TripDetailPage(tripId: id);
         },
+      ),
+      GoRoute(
+        path: '/trip/:tripId/matching',
+        builder: (context, state) {
+          final id = state.pathParameters['tripId']!;
+          return ScheduleMatchingPage(tripId: id);
+        },
+      ),
+      GoRoute(
+        path: '/trip/:tripId/explore',
+        builder: (context, state) => const EksplorPage(),
       ),
       GoRoute(
         path: '/trip/:tripId/members',

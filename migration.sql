@@ -19,9 +19,6 @@ CREATE TABLE public.destinations (
   location text NOT NULL,
   type text NOT NULL CHECK (type = ANY (ARRAY['tourism'::text, 'culinary'::text])),
   image_url text NOT NULL,
-  rating numeric DEFAULT 0,
-  review_count integer DEFAULT 0,
-  is_active boolean DEFAULT true,
   created_by uuid NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
@@ -32,12 +29,14 @@ CREATE TABLE public.trips (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name text NOT NULL,
   destination_id uuid,
-  start_date date NOT NULL,
-  end_date date NOT NULL,
+  start_date date,
+  end_date date,
   type text NOT NULL CHECK (type = ANY (ARRAY['solo'::text, 'group'::text, 'family'::text])),
   created_by uuid NOT NULL,
-  current_level integer NOT NULL DEFAULT 1 CHECK (current_level >= 1 AND current_level <= 5),
+  created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  selected_date date,
+  status character varying DEFAULT 'draft'::character varying,
   CONSTRAINT trips_pkey PRIMARY KEY (id),
   CONSTRAINT trips_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES public.destinations(id),
   CONSTRAINT trips_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
@@ -66,27 +65,35 @@ CREATE TABLE public.invitations (
   CONSTRAINT invitations_pkey PRIMARY KEY (id),
   CONSTRAINT invitations_trip_id_fkey FOREIGN KEY (trip_id) REFERENCES public.trips(id)
 );
-CREATE TABLE public.trip_days (
+CREATE TABLE public.trip_schedule_candidates (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  trip_id uuid,
+  candidate_date date NOT NULL,
+  available_members_count integer NOT NULL,
+  total_members_count integer NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT trip_schedule_candidates_pkey PRIMARY KEY (id),
+  CONSTRAINT trip_schedule_candidates_trip_id_fkey FOREIGN KEY (trip_id) REFERENCES public.trips(id)
+);
+CREATE TABLE public.trip_itineraries (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   trip_id uuid NOT NULL,
-  day_number integer NOT NULL,
-  date date NOT NULL,
-  status text NOT NULL DEFAULT 'locked'::text CHECK (status = ANY (ARRAY['locked'::text, 'active'::text, 'completed'::text])),
-  CONSTRAINT trip_days_pkey PRIMARY KEY (id),
-  CONSTRAINT trip_days_trip_id_fkey FOREIGN KEY (trip_id) REFERENCES public.trips(id)
-);
-CREATE TABLE public.activities (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  trip_day_id uuid NOT NULL,
-  destination_id uuid,
-  start_time time without time zone NOT NULL,
-  end_time time without time zone NOT NULL,
-  type text NOT NULL CHECK (type = ANY (ARRAY['wisata'::text, 'kuliner'::text, 'custom'::text])),
-  notes text,
-  cost_estimate numeric DEFAULT 0,
+  destination_id uuid NOT NULL,
+  visit_date date NOT NULL,
+  order_index integer NOT NULL DEFAULT 0,
   created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT activities_pkey PRIMARY KEY (id),
-  CONSTRAINT activities_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES public.destinations(id),
-  CONSTRAINT activities_trip_day_id_fkey FOREIGN KEY (trip_day_id) REFERENCES public.trip_days(id)
+  start_time time without time zone,
+  end_time time without time zone,
+  CONSTRAINT trip_itineraries_pkey PRIMARY KEY (id),
+  CONSTRAINT trip_itineraries_trip_id_fkey FOREIGN KEY (trip_id) REFERENCES public.trips(id),
+  CONSTRAINT trip_itineraries_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES public.destinations(id)
+);
+CREATE TABLE public.user_availabilities (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  start_time timestamp with time zone NOT NULL,
+  end_time timestamp with time zone NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_availabilities_pkey PRIMARY KEY (id),
+  CONSTRAINT user_availabilities_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

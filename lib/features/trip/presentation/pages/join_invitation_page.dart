@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'invitation_provider.dart';
+import '../../../google_calendar/presentation/providers/google_calendar_provider.dart';
 
 class JoinInvitationPage extends StatefulWidget {
   const JoinInvitationPage({Key? key}) : super(key: key);
@@ -27,20 +28,58 @@ class _JoinInvitationPageState extends State<JoinInvitationPage> {
 
     setState(() => _isValidating = true);
 
+    // Tampilkan popup untuk sinkronisasi kalender TERLEBIH DAHULU
+    final shouldSync = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Hubungkan Kalender?'),
+        content: const Text(
+          'Agar kami dapat mencocokkan jadwal Anda dengan anggota trip lainnya secara akurat, izinkan kami mengimpor jadwal kosong Anda dari Google Calendar.'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Nanti Saja'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hubungkan'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldSync == true && mounted) {
+      try {
+        await context.read<GoogleCalendarProvider>().syncSchedulesToDatabase();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Kalender berhasil disinkronisasi!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal sinkronisasi kalender: $e')),
+          );
+        }
+      }
+    }
+
+    if (!mounted) return;
+
     final provider = context.read<InvitationProvider>();
-    // Optional: We can do preview first, but for simplicity, we just join directly as requested in flow
     final success = await provider.join(code);
 
     setState(() => _isValidating = false);
 
     if (success && mounted) {
-      final inv = provider.currentInvitation;
-      if (inv != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Berhasil bergabung!')));
-        context.replace('/user/invitation/${inv.id}');
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Berhasil bergabung dengan trip!')),
+      );
+
+      context.go('/user/my-trips');
     } else if (mounted) {
       final error = provider.errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(

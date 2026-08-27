@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_error.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/destination_provider.dart';
-import '../widgets/destination_card.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../domain/entities/destination_entity.dart';
 
 class EksplorPage extends StatefulWidget {
   const EksplorPage({super.key});
@@ -34,96 +34,30 @@ class _EksplorPageState extends State<EksplorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () =>
-              context.read<DestinationProvider>().fetchDestinations(),
-          child: CustomScrollView(
-            slivers: [
-              _buildHeader(),
-              _buildSearchBox(),
-              _buildCategories(),
-              _buildContent(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Consumer<AuthProvider>(
-                  builder: (context, auth, _) {
-                    final name = auth.user?.name ?? 'Rantau';
-                    final role = auth.user?.role.toString() ?? 'unknown';
-                    return Row(
-                      children: [
-                        Text(
-                          'Halo, $name 👋',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            role,
-                            style: TextStyle(
-                              color: Colors.red[900],
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Text(
+                'Rekomendasi Tempat Wisata',
+                style: LivestTypography.textLg.copyWith(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Mau pergi ke mana hari ini?',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+              ),
             ),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.notifications_none,
-                    color: AppColors.textPrimary,
-                  ),
-                  onPressed: () {},
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<DestinationProvider>().fetchDestinations();
+                },
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [_buildSearchBox(), _buildContent()],
                 ),
-                const SizedBox(width: 8),
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.primary,
-                  child: Icon(Icons.person, color: Colors.white),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -134,79 +68,26 @@ class _EksplorPageState extends State<EksplorPage> {
   Widget _buildSearchBox() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: TextField(
-          controller: _searchController,
-          onChanged: (value) {
-            context.read<DestinationProvider>().search(value);
-          },
-          decoration: InputDecoration(
-            hintText: 'Cari destinasi atau kuliner',
-            hintStyle: const TextStyle(color: AppColors.textSecondary),
-            prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-            filled: true,
-            fillColor: Colors.grey[100],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    final categories = ['Semua', 'Wisata', 'Kuliner'];
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: SizedBox(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+        child: Container(
           height: 40,
-          child: Consumer<DestinationProvider>(
-            builder: (context, provider, _) {
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = provider.selectedCategory == category;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: GestureDetector(
-                      onTap: () => provider.setCategory(category),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            category,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+          ),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              context.read<DestinationProvider>().search(value);
             },
+            decoration: InputDecoration(
+              hintText: 'Cari wisata',
+              hintStyle: TextStyle(color: Colors.black54, fontSize: 14),
+              prefixIcon: Icon(Icons.search, color: Colors.black, size: 20),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 16),
+            ),
           ),
         ),
       ),
@@ -216,7 +97,8 @@ class _EksplorPageState extends State<EksplorPage> {
   Widget _buildContent() {
     return Consumer<DestinationProvider>(
       builder: (context, provider, _) {
-        if (provider.state == DestinationState.loading) {
+        if (provider.state == DestinationState.loading &&
+            provider.destinations.isEmpty) {
           return const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
           );
@@ -231,7 +113,8 @@ class _EksplorPageState extends State<EksplorPage> {
           );
         }
 
-        if (provider.state == DestinationState.empty) {
+        if (provider.state == DestinationState.empty ||
+            provider.displayedDestinations.isEmpty) {
           return const SliverFillRemaining(
             child: Center(
               child: Text(
@@ -242,49 +125,93 @@ class _EksplorPageState extends State<EksplorPage> {
           );
         }
 
-        final title = provider.isSearching
-            ? 'Hasil Pencarian'
-            : 'Semua Destinasi';
+        return SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final dest = provider.displayedDestinations[index];
+            return _buildListItem(context, dest);
+          }, childCount: provider.displayedDestinations.length),
+        );
+      },
+    );
+  }
 
-        return SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
+  Widget _buildListItem(BuildContext context, DestinationEntity dest) {
+    return InkWell(
+      onTap: () => context.push('/destination/${dest.id}'),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 12),
+        child: Column(
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 16),
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dest.name,
+                        style: LivestTypography.bodyLgMedium.copyWith(
+                          color: Colors.black,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            color: Color(0xFFFFD700),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '4.8 (2.021)', // Mock rating
+                            style: LivestTypography.caption.copyWith(
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        dest.type == DestinationType.tourism
+                            ? 'Wisata dan alam'
+                            : 'Hotel dan restoran',
+                        style: LivestTypography.caption.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    dest.imageUrl,
+                    width: 90,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 90,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: provider.displayedDestinations.length,
-                  itemBuilder: (context, index) {
-                    final dest = provider.displayedDestinations[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: DestinationCard(
-                        destination: dest,
-                        isLarge: false,
-                        onTap: () => context.push('/destination/${dest.id}'),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 40),
               ],
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 16),
+            Divider(height: 1, color: Colors.grey.shade300),
+          ],
+        ),
+      ),
     );
   }
 }

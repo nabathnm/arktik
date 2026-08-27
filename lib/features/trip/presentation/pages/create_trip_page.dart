@@ -5,6 +5,7 @@ import '../../domain/entities/trip_entity.dart';
 import '../providers/trip_provider.dart';
 import '../../../destination/domain/entities/destination_entity.dart';
 import '../../../destination/presentation/providers/destination_provider.dart';
+import '../../../google_calendar/presentation/providers/google_calendar_provider.dart';
 
 class CreateTripPage extends StatefulWidget {
   const CreateTripPage({super.key});
@@ -28,12 +29,7 @@ class _CreateTripPageState extends State<CreateTripPage> {
     });
   }
 
-  DateTime? _startDate;
-  DateTime? _endDate;
   TripType _selectedType = TripType.solo;
-
-  // Nanti bisa menggunakan Dropdown yang terhubung dengan API destinations
-  String? _selectedDestinationId;
 
   @override
   void dispose() {
@@ -41,53 +37,31 @@ class _CreateTripPageState extends State<CreateTripPage> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final initialDate = isStart
-        ? (_startDate ?? DateTime.now())
-        : (_endDate ?? _startDate ?? DateTime.now());
-    final firstDate = isStart ? DateTime.now() : (_startDate ?? DateTime.now());
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-          // Auto-adjust end date if it's before the new start date
-          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = _startDate;
-          }
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih tanggal mulai dan selesai'),
-        ),
-      );
-      return;
-    }
 
     try {
       await context.read<TripProvider>().createTrip(
         name: _nameController.text,
-        destinationId: _selectedDestinationId, // Nullable for now
-        startDate: _startDate!,
-        endDate: _endDate!,
+        destinationId: null,
+        startDate: null,
+        endDate: null,
         type: _selectedType,
       );
+
+      if (!mounted) return;
+
+      // Sinkronisasi kalender Google untuk leader setelah membuat trip
+      try {
+        await context.read<GoogleCalendarProvider>().syncSchedulesToDatabase();
+      } catch (_) {
+        // Sync gagal tidak menghalangi pembuatan trip
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Trip dibuat, tapi sinkronisasi kalender gagal. Silakan coba sync manual.')),
+          );
+        }
+      }
 
       if (!mounted) return;
 
@@ -130,108 +104,6 @@ class _CreateTripPageState extends State<CreateTripPage> {
               ),
               const SizedBox(height: 16),
 
-              // Destination Selection
-              const Text(
-                'Destinasi (Opsional)',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Autocomplete<DestinationEntity>(
-                displayStringForOption: (option) =>
-                    '${option.name} - ${option.location}',
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  final provider = context.read<DestinationProvider>();
-                  final allDestinations = provider.destinations;
-                  if (textEditingValue.text.isEmpty) {
-                    return const Iterable<DestinationEntity>.empty();
-                  }
-                  return allDestinations.where((dest) {
-                    final query = textEditingValue.text.toLowerCase();
-                    return dest.name.toLowerCase().contains(query) ||
-                        dest.location.toLowerCase().contains(query);
-                  });
-                },
-                onSelected: (DestinationEntity selection) {
-                  setState(() {
-                    _selectedDestinationId = selection.id;
-                  });
-                },
-                fieldViewBuilder:
-                    (
-                      context,
-                      textEditingController,
-                      focusNode,
-                      onFieldSubmitted,
-                    ) {
-                      return TextFormField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        decoration: InputDecoration(
-                          hintText: 'Cari destinasi...',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: _selectedDestinationId != null
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () {
-                                    textEditingController.clear();
-                                    setState(() {
-                                      _selectedDestinationId = null;
-                                    });
-                                  },
-                                )
-                              : const Icon(Icons.search),
-                        ),
-                        onChanged: (val) {
-                          if (val.isEmpty) {
-                            setState(() {
-                              _selectedDestinationId = null;
-                            });
-                          }
-                        },
-                      );
-                    },
-              ),
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectDate(context, true),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Tanggal Mulai',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(
-                          _startDate != null
-                              ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
-                              : 'Pilih Tanggal',
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectDate(context, false),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Tanggal Selesai',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(
-                          _endDate != null
-                              ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                              : 'Pilih Tanggal',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
               const Text(
                 'Tipe Trip',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -261,7 +133,7 @@ class _CreateTripPageState extends State<CreateTripPage> {
                 child: isLoading
                     ? const CircularProgressIndicator()
                     : const Text(
-                        'Simpan & Kembali',
+                        'Buat Trip',
                         style: TextStyle(fontSize: 16),
                       ),
               ),

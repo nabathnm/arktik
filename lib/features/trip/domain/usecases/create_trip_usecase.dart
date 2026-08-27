@@ -9,8 +9,8 @@ class CreateTripUseCase {
   Future<TripEntity> execute({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   }) {
     return repository.createTrip(

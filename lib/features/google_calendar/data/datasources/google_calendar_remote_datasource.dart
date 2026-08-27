@@ -19,64 +19,115 @@ class GoogleCalendarRemoteDataSourceImpl
 
   Future<calendar.CalendarApi> _getCalendarApi() async {
     const calendarScope = 'https://www.googleapis.com/auth/calendar.events';
-    const calendarReadonlyScope = 'https://www.googleapis.com/auth/calendar.readonly';
+    const calendarReadonlyScope =
+        'https://www.googleapis.com/auth/calendar.readonly';
+    final scopes = [calendarScope, calendarReadonlyScope];
 
-    if (_googleSignIn.currentUser == null) {
-      // Di platform Web, karena kita menggunakan Supabase OAuth untuk login awal,
-      // plugin google_sign_in belum tahu siapa user-nya. Kita harus panggil signIn() dulu.
-      await _googleSignIn.signIn();
-    }
+    try {
+      if (_googleSignIn.currentUser == null) {
+        // Do NOT use signInSilently() here because it introduces an async delay
+        // that causes the browser to lose the "user gesture" context.
+        // When the user gesture is lost, subsequent popups for signIn() or requestScopes()
+        // will be blocked by the browser, causing them to hang and time out.
+        var account = await _googleSignIn.signIn().timeout(
+          const Duration(seconds: 45),
+          onTimeout: () => throw Exception(
+            'Sign in popup timed out. Please check if your browser blocked the popup.',
+          ),
+        );
 
-    // Pastikan user sudah memberikan akses calendar scope
-    final bool isAuthorized = await _googleSignIn.requestScopes([
-      calendarScope,
-      calendarReadonlyScope,
-    ]);
-    if (!isAuthorized) {
-      throw Exception('Calendar permission denied by user.');
-    }
+        if (account == null) {
+          throw Exception('Sign in was cancelled or failed.');
+        }
+      }
 
-    final httpClient = await _googleSignIn.authenticatedClient();
-    if (httpClient == null) {
-      throw Exception(
-        'User is not authenticated with Google or has not granted calendar scopes.',
+      // Check if scopes are already granted
+      final bool isAuthorized = await _googleSignIn
+          .canAccessScopes(scopes)
+          .timeout(const Duration(seconds: 5), onTimeout: () => false);
+
+      if (!isAuthorized) {
+        final bool granted = await _googleSignIn
+            .requestScopes(scopes)
+            .timeout(
+              const Duration(seconds: 45),
+              onTimeout: () => throw Exception(
+                'Scope request timed out. Please check if your browser blocked the popup.',
+              ),
+            );
+        if (!granted) {
+          throw Exception(
+            'Calendar permission denied by user. You must check the boxes to allow access.',
+          );
+        }
+      }
+
+      final httpClient = await _googleSignIn.authenticatedClient().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception(
+          'Failed to get authenticated client. Token refresh might be hanging.',
+        ),
       );
+      if (httpClient == null) {
+        throw Exception(
+          'User is not authenticated with Google or has not granted calendar scopes.',
+        );
+      }
+      return calendar.CalendarApi(httpClient);
+    } catch (e) {
+      // Re-throw so the provider can catch and handle it to stop the loading state
+      throw Exception('Failed to get Calendar API: $e');
     }
-    return calendar.CalendarApi(httpClient);
   }
 
   @override
   Future<List<calendar.Event>> getEvents() async {
     final api = await _getCalendarApi();
     final now = DateTime.now();
-    final events = await api.events.list(
-      'primary',
-      maxResults: 50,
-      singleEvents: true,
-      orderBy: 'startTime',
-      timeMin: now.toUtc(),
-      timeMax: now
-          .add(const Duration(days: 30))
-          .toUtc(), // Batasi 30 hari ke depan
-    );
 
-    final fetchedItems = events.items ?? [];
+    try {
+      final events = await api.events
+          .list(
+            'primary',
+            maxResults: 250,
+            singleEvents: true,
+            orderBy: 'startTime',
+            timeMin: now
+                .subtract(const Duration(days: 365))
+                .toUtc(), // 1 tahun ke belakang
+            timeMax: now
+                .add(const Duration(days: 365))
+                .toUtc(), // 1 tahun ke depan
+          )
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () => throw Exception(
+              'Fetching events from Google Calendar timed out.',
+            ),
+          );
 
-    // Filter manual di sisi Dart untuk membuang event Ulang Tahun / Birthday
-    final filteredEvents = fetchedItems.where((event) {
-      final summary = event.summary?.toLowerCase() ?? '';
-      final isBirthday =
-          summary.contains('birthday') || summary.contains('ulang tahun');
-      return !isBirthday;
-    }).toList();
+      final fetchedItems = events.items ?? [];
 
-    return filteredEvents;
+      // Filter manual di sisi Dart untuk membuang event Ulang Tahun / Birthday
+      final filteredEvents = fetchedItems.where((event) {
+        final summary = event.summary?.toLowerCase() ?? '';
+        final isBirthday =
+            summary.contains('birthday') || summary.contains('ulang tahun');
+        return !isBirthday;
+      }).toList();
+
+      return filteredEvents;
+    } catch (e) {
+      throw Exception('Failed to fetch events: $e');
+    }
   }
 
   @override
   Future<calendar.Event> createEvent(calendar.Event event) async {
     final api = await _getCalendarApi();
-    return await api.events.insert(event, 'primary');
+    return await api.events
+        .insert(event, 'primary')
+        .timeout(const Duration(seconds: 15));
   }
 
   @override
@@ -94,9 +145,12 @@ class GoogleCalendarRemoteDataSourceImpl
   }
 
   @override
-  Future<List<calendar.TimePeriod>> getFreeBusy(DateTime start, DateTime end) async {
+  Future<List<calendar.TimePeriod>> getFreeBusy(
+    DateTime start,
+    DateTime end,
+  ) async {
     final api = await _getCalendarApi();
-    
+
     final request = calendar.FreeBusyRequest(
       timeMin: start.toUtc(),
       timeMax: end.toUtc(),

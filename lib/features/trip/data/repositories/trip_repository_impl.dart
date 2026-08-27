@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../../domain/entities/trip_member_entity.dart';
 import '../../domain/entities/trip_summary_entity.dart';
+import '../../domain/entities/trip_itinerary_entity.dart';
 import '../../domain/repositories/trip_repository.dart';
 import '../datasources/trip_remote_data_source.dart';
 
@@ -13,8 +15,8 @@ class TripRepositoryImpl implements TripRepository {
   Future<TripEntity> createTrip({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   }) async {
     return await remoteDataSource.createTrip(
@@ -64,5 +66,32 @@ class TripRepositoryImpl implements TripRepository {
   @override
   Future<void> deleteTrip(String tripId) async {
     return await remoteDataSource.deleteTrip(tripId);
+  }
+
+  @override
+  Future<List<TripItineraryEntity>> getTripItineraries(String tripId) async {
+    return await remoteDataSource.getTripItineraries(tripId);
+  }
+
+  @override
+  Future<TripItineraryEntity> addDestinationToTrip({
+    required String tripId,
+    required String destinationId,
+    required DateTime visitDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  }) async {
+    return await remoteDataSource.addDestinationToTrip(
+      tripId: tripId,
+      destinationId: destinationId,
+      visitDate: visitDate,
+      startTime: startTime,
+      endTime: endTime,
+    );
+  }
+
+  @override
+  Future<void> removeDestinationFromTrip(String itineraryId) async {
+    return await remoteDataSource.removeDestinationFromTrip(itineraryId);
   }
 }

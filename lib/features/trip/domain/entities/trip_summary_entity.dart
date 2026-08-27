@@ -6,8 +6,10 @@ class TripSummaryEntity extends Equatable {
   final String id;
   final String name;
   final String? destinationName;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final DateTime? selectedDate;
+  final TripStatus status;
   final TripMemberRole myRole;
   final String? leaderName;
   final String? leaderAvatarUrl;
@@ -18,8 +20,10 @@ class TripSummaryEntity extends Equatable {
     required this.id,
     required this.name,
     this.destinationName,
-    required this.startDate,
-    required this.endDate,
+    this.startDate,
+    this.endDate,
+    this.selectedDate,
+    required this.status,
     required this.myRole,
     this.leaderName,
     this.leaderAvatarUrl,
@@ -34,6 +38,8 @@ class TripSummaryEntity extends Equatable {
     destinationName,
     startDate,
     endDate,
+    selectedDate,
+    status,
     myRole,
     leaderName,
     leaderAvatarUrl,

@@ -1,13 +1,15 @@
+import 'package:flutter/material.dart';
 import '../entities/trip_entity.dart';
 import '../entities/trip_member_entity.dart';
 import '../entities/trip_summary_entity.dart';
+import '../entities/trip_itinerary_entity.dart';
 
 abstract class TripRepository {
   Future<TripEntity> createTrip({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   });
 
@@ -26,4 +28,16 @@ abstract class TripRepository {
   Future<void> removeTripMember({required String tripId, required String memberUserId});
 
   Future<void> deleteTrip(String tripId);
+
+  Future<List<TripItineraryEntity>> getTripItineraries(String tripId);
+
+  Future<TripItineraryEntity> addDestinationToTrip({
+    required String tripId,
+    required String destinationId,
+    required DateTime visitDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  });
+
+  Future<void> removeDestinationFromTrip(String itineraryId);
 }

@@ -12,6 +12,11 @@ import '../../domain/usecases/remove_trip_member_usecase.dart';
 import '../../domain/usecases/leave_trip_usecase.dart';
 import '../../domain/usecases/delete_trip_usecase.dart';
 
+import '../../domain/usecases/add_destination_to_trip_usecase.dart';
+import '../../domain/usecases/get_trip_itineraries_usecase.dart';
+import '../../domain/usecases/remove_destination_from_trip_usecase.dart';
+import '../../domain/entities/trip_itinerary_entity.dart';
+
 enum TripStateStatus { initial, loading, loaded, error }
 
 class TripProvider extends ChangeNotifier {
@@ -24,6 +29,10 @@ class TripProvider extends ChangeNotifier {
   final RemoveTripMemberUseCase removeTripMemberUseCase;
   final LeaveTripUseCase leaveTripUseCase;
   final DeleteTripUseCase deleteTripUseCase;
+  
+  final AddDestinationToTripUseCase addDestinationToTripUseCase;
+  final GetTripItinerariesUseCase getTripItinerariesUseCase;
+  final RemoveDestinationFromTripUseCase removeDestinationFromTripUseCase;
 
   TripProvider({
     required this.createTripUseCase,
@@ -35,6 +44,9 @@ class TripProvider extends ChangeNotifier {
     required this.removeTripMemberUseCase,
     required this.leaveTripUseCase,
     required this.deleteTripUseCase,
+    required this.addDestinationToTripUseCase,
+    required this.getTripItinerariesUseCase,
+    required this.removeDestinationFromTripUseCase,
   });
 
   TripStateStatus _status = TripStateStatus.initial;
@@ -58,6 +70,9 @@ class TripProvider extends ChangeNotifier {
   TripMemberEntity? _myMembership;
   TripMemberEntity? get myMembership => _myMembership;
 
+  List<TripItineraryEntity> _itineraries = [];
+  List<TripItineraryEntity> get itineraries => _itineraries;
+
   void _setStatus(TripStateStatus status, {String? error}) {
     _status = status;
     _errorMessage = error;
@@ -67,8 +82,8 @@ class TripProvider extends ChangeNotifier {
   Future<void> createTrip({
     required String name,
     String? destinationId,
-    required DateTime startDate,
-    required DateTime endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     required TripType type,
   }) async {
     _setStatus(TripStateStatus.loading);
@@ -104,12 +119,51 @@ class TripProvider extends ChangeNotifier {
     _setStatus(TripStateStatus.loading);
     try {
       _currentTrip = await getTripByIdUseCase(tripId);
-      _leader = await getTripLeaderUseCase(tripId);
       _members = await getTripMembersUseCase(tripId);
+      _leader = await getTripLeaderUseCase(tripId);
       _myMembership = await getMyMembershipUseCase(tripId);
+      _itineraries = await getTripItinerariesUseCase(tripId);
       _setStatus(TripStateStatus.loaded);
     } catch (e) {
       _setStatus(TripStateStatus.error, error: e.toString());
+    }
+  }
+
+  Future<void> addDestinationToTrip({
+    required String tripId,
+    required String destinationId,
+    required DateTime visitDate,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  }) async {
+    _setStatus(TripStateStatus.loading);
+    try {
+      final newItinerary = await addDestinationToTripUseCase.execute(
+        tripId: tripId,
+        destinationId: destinationId,
+        visitDate: visitDate,
+        startTime: startTime,
+        endTime: endTime,
+      );
+      if (_currentTrip != null && _currentTrip!.id == tripId) {
+        _itineraries = [..._itineraries, newItinerary];
+      }
+      _setStatus(TripStateStatus.loaded);
+    } catch (e) {
+      _setStatus(TripStateStatus.error, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> removeDestinationFromTrip(String itineraryId) async {
+    _setStatus(TripStateStatus.loading);
+    try {
+      await removeDestinationFromTripUseCase.execute(itineraryId);
+      _itineraries = _itineraries.where((i) => i.id != itineraryId).toList();
+      _setStatus(TripStateStatus.loaded);
+    } catch (e) {
+      _setStatus(TripStateStatus.error, error: e.toString());
+      rethrow;
     }
   }
 
