@@ -4,9 +4,7 @@ class InvitationModel extends InvitationEntity {
   const InvitationModel({
     required super.id,
     required super.code,
-    required super.createdBy,
-    required super.title,
-    super.description,
+    required super.tripId,
     required super.status,
     required super.maxMembers,
     required super.expiresAt,
@@ -18,9 +16,7 @@ class InvitationModel extends InvitationEntity {
     return InvitationModel(
       id: json['id'] as String,
       code: json['code'] as String,
-      createdBy: json['created_by'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
+      tripId: json['trip_id'] as String,
       status: _parseStatus(json['status'] as String),
       maxMembers: json['max_members'] as int,
       expiresAt: DateTime.parse(json['expires_at'] as String),
@@ -45,9 +41,7 @@ class InvitationModel extends InvitationEntity {
     return {
       'id': id,
       'code': code,
-      'created_by': createdBy,
-      'title': title,
-      'description': description,
+      'trip_id': tripId,
       'status': status.name,
       'max_members': maxMembers,
       'expires_at': expiresAt.toIso8601String(),

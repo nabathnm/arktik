@@ -3,11 +3,9 @@ import '../entities/invitation_member_entity.dart';
 
 abstract class InvitationRepository {
   Future<InvitationEntity> createInvitation({
-    required String title,
-    String? description,
     required int maxMembers,
     required DateTime expiresAt,
-    String? tripId,
+    required String tripId,
   });
 
   Future<InvitationEntity?> getInvitationByCode(String code);

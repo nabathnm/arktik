@@ -22,10 +22,11 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
       orElse: () => const DestinationEntity(
         id: '',
         name: 'Marina Bay, Singapura',
-        description: 'Jalan air & distrik hiburan terkenal dengan gedung tinggi modern, bangunan terkenal, restoran & perbelanjaan.',
+        description:
+            'Jalan air & distrik hiburan terkenal dengan gedung tinggi modern, bangunan terkenal, restoran & perbelanjaan.',
         location: 'Singapura',
         type: DestinationType.tourism,
-        imageUrl: 'https://placeholder.com', 
+        imageUrl: 'https://placeholder.com',
         createdBy: '',
       ),
     );
@@ -62,7 +63,11 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
                           color: AppColors.primary.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -78,16 +83,26 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
                 children: [
                   Text(
                     destination.name,
-                    style: LivestTypography.h3.copyWith(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+                    style: AppTypography.h3.copyWith(
+                      color: Colors.black,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFFFD700), size: 18),
+                      const Icon(
+                        Icons.star,
+                        color: Color(0xFFFFD700),
+                        size: 18,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '4.8 (2.021)', // Mock rating
-                        style: LivestTypography.bodySm.copyWith(color: Colors.grey.shade700),
+                        style: AppTypography.bodySm.copyWith(
+                          color: Colors.grey.shade700,
+                        ),
                       ),
                     ],
                   ),
@@ -103,15 +118,19 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
                   Center(
                     child: Text(
                       'Deskripsi',
-                      style: LivestTypography.bodyLgBold.copyWith(color: Colors.black),
+                      style: AppTypography.bodyLgBold.copyWith(
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Divider(height: 1, color: Colors.black, thickness: 1),
                   const SizedBox(height: 24),
                   Text(
-                    destination.description.isNotEmpty ? destination.description : 'Jalan air & distrik hiburan terkenal dengan gedung tinggi modern, bangunan terkenal, restoran & perbelanjaan.',
-                    style: LivestTypography.bodyMd.copyWith(color: Colors.black87),
+                    destination.description.isNotEmpty
+                        ? destination.description
+                        : 'Jalan air & distrik hiburan terkenal dengan gedung tinggi modern, bangunan terkenal, restoran & perbelanjaan.',
+                    style: AppTypography.bodyMd.copyWith(color: Colors.black87),
                   ),
                 ],
               ),
@@ -132,7 +151,10 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Add to Trip', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Add to Trip',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -145,18 +167,20 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
 
   void _showTripSelector(BuildContext context) {
     final tripProvider = context.read<TripProvider>();
-    final activeTrips = tripProvider.myTrips.where((t) => t.selectedDate != null).toList();
+    final activeTrips = tripProvider.myTrips
+        .where((t) => t.startDate != null && t.endDate != null)
+        .toList();
 
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (sheetContext) {
         if (activeTrips.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(24.0),
-            child: Text('You have no trips with a selected date yet.'),
+            child: Text('You have no trips with a selected date range yet.'),
           );
         }
 
@@ -174,50 +198,75 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: activeTrips.length,
-                itemBuilder: (context, index) {
+                itemBuilder: (listContext, index) {
                   final trip = activeTrips[index];
                   return ListTile(
                     leading: const Icon(Icons.flight),
                     title: Text(trip.name),
-                    subtitle: Text('Date: ${trip.selectedDate!.toString().split(' ')[0]}'),
+                    subtitle: Text(
+                      'Dates: ${trip.startDate!.toString().split(' ')[0]} to ${trip.endDate!.toString().split(' ')[0]}',
+                    ),
                     onTap: () async {
+                      // 1. Choose Visit Date
+                      final visitDate = await showDatePicker(
+                        context: sheetContext,
+                        initialDate: trip.startDate!,
+                        firstDate: trip.startDate!,
+                        lastDate: trip.endDate!,
+                        helpText: 'Select Visit Date',
+                      );
+
+                      if (visitDate == null || !sheetContext.mounted) return;
+
+                      // 2. Choose Start Time
                       final startTime = await showTimePicker(
-                        context: context,
+                        context: sheetContext,
                         initialTime: const TimeOfDay(hour: 9, minute: 0),
                         helpText: 'Select Start Time',
                       );
-                      
-                      if (startTime == null || !context.mounted) return;
 
+                      if (startTime == null || !sheetContext.mounted) return;
+
+                      // 3. Choose End Time
                       final endTime = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay(hour: startTime.hour + 2, minute: startTime.minute),
+                        context: sheetContext,
+                        initialTime: TimeOfDay(
+                          hour: startTime.hour + 2,
+                          minute: startTime.minute,
+                        ),
                         helpText: 'Select End Time',
                       );
 
-                      if (endTime == null || !context.mounted) return;
+                      if (endTime == null || !sheetContext.mounted) return;
 
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext); // Close bottom sheet
 
                       try {
                         await tripProvider.addDestinationToTrip(
                           tripId: trip.id,
                           destinationId: destinationId,
-                          visitDate: trip.selectedDate!,
+                          visitDate: visitDate,
                           startTime: startTime,
                           endTime: endTime,
                         );
+                        
+                        // Use outer context to check if the page is still mounted
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Destination added to trip!')),
+                            const SnackBar(
+                              content: Text('Destination added to trip!'),
+                            ),
                           );
+                          // Go back to trip detail page
                           context.go('/trip/${trip.id}');
                         }
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(e.toString().replaceAll('Exception: ', '')),
+                              content: Text(
+                                e.toString().replaceAll('Exception: ', ''),
+                              ),
                               backgroundColor: AppColors.redNormal,
                             ),
                           );

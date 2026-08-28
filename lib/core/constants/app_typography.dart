@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class LivestTypography {
-  LivestTypography._();
+class AppTypography {
+  AppTypography._();
 
   static const String _font = 'PlusJakartaSans';
 

@@ -11,8 +11,7 @@ class ActiveTripCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // For progress, we calculate it just like in TripCard, or we can hardcode for the UI mock
-    double progress = 0.2; // Based on the mock '20% Selesai'
+    double progress = 0.2;
     final progressPercent = (progress * 100).toInt();
 
     return GestureDetector(
@@ -41,9 +40,9 @@ class ActiveTripCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
-                    'https://picsum.photos/seed/${trip.id}/200', // Placeholder image
-                    width: 70,
-                    height: 80,
+                    'https://picsum.photos/seed/${trip.id}/200',
+                    width: 78,
+                    height: 89,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -55,22 +54,25 @@ class ActiveTripCard extends StatelessWidget {
                     children: [
                       Text(
                         trip.name,
-                        style: LivestTypography.h3,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '08.00 - 12.00',
-                        style: LivestTypography.bodySm.copyWith(
+                        style: AppTypography.bodySm.copyWith(
                           color: AppColors.textSecondary,
-                          fontSize: 14,
+                          fontSize: 15,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        trip.destinationName ?? 'Naik ferry dari Battery Park',
-                        style: LivestTypography.bodySm.copyWith(
+                        trip.destinationName ?? 'Naik ferry dari Jatim Park',
+                        style: AppTypography.bodySm.copyWith(
                           color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
@@ -86,13 +88,19 @@ class ActiveTripCard extends StatelessWidget {
           // Progress Section (Outside the card)
           RichText(
             text: TextSpan(
-              style: LivestTypography.bodySm.copyWith(
+              style: AppTypography.bodySm.copyWith(
                 color: AppColors.textSecondary,
               ),
               children: [
-                const TextSpan(text: 'Progres: '),
                 TextSpan(
-                  text: '$progressPercent% Selesai',
+                  text: 'Progres: ',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                TextSpan(
+                  text: ' $progressPercent% Selesai',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,

@@ -15,6 +15,7 @@ import '../../domain/usecases/delete_trip_usecase.dart';
 import '../../domain/usecases/add_destination_to_trip_usecase.dart';
 import '../../domain/usecases/get_trip_itineraries_usecase.dart';
 import '../../domain/usecases/remove_destination_from_trip_usecase.dart';
+import '../../domain/usecases/update_trip_checklist_usecase.dart';
 import '../../domain/entities/trip_itinerary_entity.dart';
 
 enum TripStateStatus { initial, loading, loaded, error }
@@ -33,6 +34,7 @@ class TripProvider extends ChangeNotifier {
   final AddDestinationToTripUseCase addDestinationToTripUseCase;
   final GetTripItinerariesUseCase getTripItinerariesUseCase;
   final RemoveDestinationFromTripUseCase removeDestinationFromTripUseCase;
+  final UpdateTripChecklistUseCase updateTripChecklistUseCase;
 
   TripProvider({
     required this.createTripUseCase,
@@ -47,6 +49,7 @@ class TripProvider extends ChangeNotifier {
     required this.addDestinationToTripUseCase,
     required this.getTripItinerariesUseCase,
     required this.removeDestinationFromTripUseCase,
+    required this.updateTripChecklistUseCase,
   });
 
   TripStateStatus _status = TripStateStatus.initial;
@@ -195,6 +198,35 @@ class TripProvider extends ChangeNotifier {
       _currentTrip = null;
       _setStatus(TripStateStatus.loaded);
     } catch (e) {
+      _setStatus(TripStateStatus.error, error: e.toString());
+    }
+  }
+
+  Future<void> updateChecklist(String tripId, List<bool> newChecklist) async {
+    if (_currentTrip == null || _currentTrip!.id != tripId) return;
+
+    // Optimistically update the UI
+    final oldTrip = _currentTrip!;
+    _currentTrip = TripEntity(
+      id: oldTrip.id,
+      name: oldTrip.name,
+      destinationId: oldTrip.destinationId,
+      startDate: oldTrip.startDate,
+      endDate: oldTrip.endDate,
+      selectedDate: oldTrip.selectedDate,
+      type: oldTrip.type,
+      status: oldTrip.status,
+      createdBy: oldTrip.createdBy,
+      createdAt: oldTrip.createdAt,
+      checklistStatus: newChecklist,
+    );
+    notifyListeners();
+
+    try {
+      await updateTripChecklistUseCase.execute(tripId, newChecklist);
+    } catch (e) {
+      // Revert if error
+      _currentTrip = oldTrip;
       _setStatus(TripStateStatus.error, error: e.toString());
     }
   }

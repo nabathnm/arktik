@@ -5,9 +5,7 @@ enum InvitationStatus { active, expired, closed }
 class InvitationEntity extends Equatable {
   final String id;
   final String code;
-  final String createdBy;
-  final String title;
-  final String? description;
+  final String tripId;
   final InvitationStatus status;
   final int maxMembers;
   final DateTime expiresAt;
@@ -17,9 +15,7 @@ class InvitationEntity extends Equatable {
   const InvitationEntity({
     required this.id,
     required this.code,
-    required this.createdBy,
-    required this.title,
-    this.description,
+    required this.tripId,
     required this.status,
     required this.maxMembers,
     required this.expiresAt,
@@ -31,9 +27,7 @@ class InvitationEntity extends Equatable {
   List<Object?> get props => [
     id,
     code,
-    createdBy,
-    title,
-    description,
+    tripId,
     status,
     maxMembers,
     expiresAt,

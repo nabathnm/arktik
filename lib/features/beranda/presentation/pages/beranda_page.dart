@@ -63,7 +63,7 @@ class _BerandaPageState extends State<BerandaPage> {
               ),
               _buildPopularDestinations(context),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 110),
             ],
           ),
         ),
@@ -84,7 +84,7 @@ class _BerandaPageState extends State<BerandaPage> {
           height: 296,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.blueNormalActive,
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(30),
             ),
@@ -178,12 +178,12 @@ class _BerandaPageState extends State<BerandaPage> {
                   onTap: () => context.push('/user/create-trip'),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 24),
               Expanded(
                 child: _buildActionCard(
                   title: 'Join Trip',
                   imagePath: 'assets/images/icon/join_trip.png',
-                  color: const Color(0xff6b6eb2), // A lighter blue/violet
+                  color: const Color(0xff6b6eb2),
                   textColor: Colors.white,
                   onTap: () => context.push('/user/join-invitation'),
                 ),

@@ -110,18 +110,16 @@ class InvitationProvider extends ChangeNotifier {
   }
 
   Future<bool> createNewInvitation({
-    required String title,
-    String? description,
     required int maxMembers,
     required DateTime expiresAt,
+    required String tripId,
   }) async {
     _setStatus(InvitationStateStatus.creating);
     try {
       final newInv = await createInvitationUseCase(
-        title: title,
-        description: description,
         maxMembers: maxMembers,
         expiresAt: expiresAt,
+        tripId: tripId,
       );
       _currentInvitation = newInv;
       _myInvitations.insert(0, newInv);
@@ -158,8 +156,6 @@ class InvitationProvider extends ChangeNotifier {
       final inv = await joinInvitationUseCase(code);
       _currentInvitation = inv;
       _setStatus(InvitationStateStatus.success);
-      // Refresh list to include new invitation
-      await loadMyInvitations();
       return true;
     } catch (e) {
       _mapExceptionToMessage(e);
@@ -191,9 +187,7 @@ class InvitationProvider extends ChangeNotifier {
         _myInvitations[index] = InvitationEntity(
           id: inv.id,
           code: inv.code,
-          createdBy: inv.createdBy,
-          title: inv.title,
-          description: inv.description,
+          tripId: inv.tripId,
           status: InvitationStatus.closed,
           maxMembers: inv.maxMembers,
           expiresAt: inv.expiresAt,

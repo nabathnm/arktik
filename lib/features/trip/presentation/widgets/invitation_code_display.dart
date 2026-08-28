@@ -6,63 +6,88 @@ class InvitationCodeDisplay extends StatelessWidget {
 
   const InvitationCodeDisplay({Key? key, required this.code}) : super(key: key);
 
-  void _copyToClipboard(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: code));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invitation code copied to clipboard')),
-    );
+  void _copyToClipboard(BuildContext context) async {
+    final rawCode = code.length >= 6 ? code.substring(0, 6).toUpperCase() : code.toUpperCase();
+    await Clipboard.setData(ClipboardData(text: rawCode));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invitation code copied to clipboard')),
+      );
+    }
   }
 
   void _shareCode() {
-    // Basic sharing logic, ideally use share_plus package
-    // For now, we simulate with a print or placeholder
-    debugPrint('Sharing code: Yuk gabung! Gunakan invitation code: $code');
+    final rawCode = code.length >= 6 ? code.substring(0, 6).toUpperCase() : code.toUpperCase();
+    debugPrint('Sharing code: Yuk gabung! Gunakan invitation code: $rawCode');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Invitation Code',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+    final displayCode = code.length >= 6
+        ? code.substring(0, 6).toUpperCase().split('').join(' - ')
+        : code.toUpperCase().split('').join(' - ');
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Invitation Code:',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
           ),
-          const SizedBox(height: 12),
-          Text(
-            code,
-            style: const TextStyle(
-              fontSize: 32,
-              letterSpacing: 4.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          displayCode,
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF26225B),
+            letterSpacing: 2.0,
+          ),
+        ),
+        const SizedBox(height: 48), // Added spacing instead of Spacer
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _shareCode,
+            icon: const Icon(Icons.share, color: Colors.black),
+            label: const Text(
+              'Bagikan',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: const BorderSide(color: Colors.black, width: 1.5),
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _copyToClipboard(context),
-                icon: const Icon(Icons.copy),
-                label: const Text('Copy'),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => _copyToClipboard(context),
+            icon: const Icon(Icons.link, color: Colors.white),
+            label: const Text(
+              'Salin Kode',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: _shareCode,
-                icon: const Icon(Icons.share),
-                label: const Text('Share'),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -144,8 +144,8 @@ class AppNavigationBar extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
@@ -165,8 +165,8 @@ class AppNavigationBar extends StatelessWidget {
               backgroundColor: Colors.white,
               selectedItemColor: AppColors.primaryNormalActive,
               unselectedItemColor: AppColors.primaryNormal,
-              selectedLabelStyle: LivestTypography.navBarSelected,
-              unselectedLabelStyle: LivestTypography.navBarUnselected,
+              selectedLabelStyle: AppTypography.navBarSelected,
+              unselectedLabelStyle: AppTypography.navBarUnselected,
               currentIndex: _calculateSelectedIndex(context, isAdmin),
               items: isAdmin ? adminItems : userItems,
               onTap: (index) => isAdmin

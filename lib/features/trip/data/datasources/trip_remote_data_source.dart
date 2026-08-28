@@ -46,6 +46,8 @@ abstract class TripRemoteDataSource {
   });
 
   Future<void> removeDestinationFromTrip(String itineraryId);
+
+  Future<void> updateTripChecklist(String tripId, List<bool> checklist);
 }
 
 class TripRemoteDataSourceImpl implements TripRemoteDataSource {
@@ -104,6 +106,9 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       status: _parseStatus(data['status'] ?? 'draft'),
       createdBy: data['created_by'],
       createdAt: DateTime.parse(data['created_at']),
+      checklistStatus: data['checklist_status'] != null
+          ? List<bool>.from(data['checklist_status'] as List)
+          : null,
     );
   }
 
@@ -148,19 +153,12 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
     if (type == TripType.group || type == TripType.family) {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       final rnd = Random.secure();
-      final part1 = String.fromCharCodes(
+      final code = String.fromCharCodes(
         Iterable.generate(
-          4,
+          6,
           (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
         ),
       );
-      final part2 = String.fromCharCodes(
-        Iterable.generate(
-          5,
-          (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
-        ),
-      );
-      final code = '$part1-$part2';
 
       await supabaseClient.from('invitations').insert({
         'code': code,
@@ -518,5 +516,13 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
         .from('trip_itineraries')
         .delete()
         .eq('id', itineraryId);
+  }
+
+  @override
+  Future<void> updateTripChecklist(String tripId, List<bool> checklist) async {
+    await supabaseClient
+        .from('trips')
+        .update({'checklist_status': checklist})
+        .eq('id', tripId);
   }
 }

@@ -39,12 +39,7 @@ class _MyTripsPageState extends State<MyTripsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Trip Saya', style: LivestTypography.h2),
-        centerTitle: true,
-        backgroundColor: AppColors.background,
-        elevation: 0,
-      ),
+
       body: Consumer<TripProvider>(
         builder: (context, provider, child) {
           if (provider.status == TripStateStatus.loading &&
@@ -99,16 +94,16 @@ class _MyTripsPageState extends State<MyTripsPage>
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
-                      vertical: 8,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.greenAccent.shade400),
+                      border: Border.all(color: AppColors.greenNormal),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       'Sedang Berjalan',
                       style: TextStyle(
-                        color: Colors.greenAccent.shade400,
+                        color: AppColors.greenNormal,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -121,19 +116,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                 else
                   ...sortedActiveKeys.expand((date) {
                     final trips = groupedActive[date]!;
-                    final dateStr = date.year == 2100
-                        ? 'TBD'
-                        : '${date.day}/${date.month}/${date.year}';
                     return [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-                        child: Text(
-                          dateStr,
-                          style: LivestTypography.bodyLg.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                       ...trips.map(
                         (trip) => TripCard(
                           trip: trip,
@@ -153,7 +136,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
                         'Telah Berakhir',
-                        style: LivestTypography.bodySm.copyWith(
+                        style: AppTypography.bodySm.copyWith(
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -174,7 +157,7 @@ class _MyTripsPageState extends State<MyTripsPage>
                         padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
                         child: Text(
                           dateStr,
-                          style: LivestTypography.bodyLg.copyWith(
+                          style: AppTypography.bodyLg.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -182,7 +165,14 @@ class _MyTripsPageState extends State<MyTripsPage>
                       ...trips.map(
                         (trip) => TripCard(
                           trip: trip,
-                          onTap: () => context.push('/trip/${trip.id}'),
+                          onTap: () {
+                            if (trip.startDate == null ||
+                                trip.endDate == null) {
+                              context.push('/availability');
+                            } else {
+                              context.push('/trip/${trip.id}');
+                            }
+                          },
                         ),
                       ),
                     ];
@@ -214,7 +204,7 @@ class _MyTripsPageState extends State<MyTripsPage>
           const SizedBox(height: 16),
           Text(
             message,
-            style: LivestTypography.bodySm.copyWith(
+            style: AppTypography.bodySm.copyWith(
               color: AppColors.textSecondary,
             ),
           ),

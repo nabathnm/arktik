@@ -15,6 +15,7 @@ class TripEntity extends Equatable {
   final TripStatus status;
   final String createdBy;
   final DateTime createdAt;
+  final List<bool>? checklistStatus;
 
   const TripEntity({
     required this.id,
@@ -27,6 +28,7 @@ class TripEntity extends Equatable {
     this.status = TripStatus.draft,
     required this.createdBy,
     required this.createdAt,
+    this.checklistStatus,
   });
 
   @override
@@ -41,5 +43,6 @@ class TripEntity extends Equatable {
     status,
     createdBy,
     createdAt,
+    checklistStatus,
   ];
 }

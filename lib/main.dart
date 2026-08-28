@@ -4,6 +4,7 @@ import 'package:rantau/features/destination/domain/usecases/get_all_destinations
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/constants/app_env.dart';
@@ -61,6 +62,7 @@ import 'features/trip/domain/usecases/remove_trip_member_usecase.dart';
 import 'features/trip/domain/usecases/add_destination_to_trip_usecase.dart';
 import 'features/trip/domain/usecases/get_trip_itineraries_usecase.dart';
 import 'features/trip/domain/usecases/remove_destination_from_trip_usecase.dart';
+import 'features/trip/domain/usecases/update_trip_checklist_usecase.dart';
 import 'features/trip/presentation/providers/trip_provider.dart';
 
 import 'features/trip/domain/repositories/schedule_matching_repository.dart';
@@ -71,6 +73,7 @@ import 'features/trip/presentation/providers/schedule_matching_provider.dart';
 class Config {
   Config();
 
+  late final SharedPreferences sharedPreferences;
   late final SupabaseClient supabase;
   late final GoogleSignIn googleSignIn;
 
@@ -131,6 +134,7 @@ class Config {
   late final RemoveTripMemberUseCase removeTripMemberUseCase;
   late final LeaveTripUseCase leaveTripUseCase;
   late final DeleteTripUseCase deleteTripUseCase;
+  late final UpdateTripChecklistUseCase updateTripChecklistUseCase;
   late final TripProvider tripProvider;
 
   // Schedule Matching
@@ -242,6 +246,7 @@ class Config {
     final addDestinationToTripUseCase = AddDestinationToTripUseCase(tripRepository);
     final getTripItinerariesUseCase = GetTripItinerariesUseCase(tripRepository);
     final removeDestinationFromTripUseCase = RemoveDestinationFromTripUseCase(tripRepository);
+    updateTripChecklistUseCase = UpdateTripChecklistUseCase(tripRepository);
 
     tripProvider = TripProvider(
       createTripUseCase: createTripUseCase,
@@ -256,6 +261,7 @@ class Config {
       addDestinationToTripUseCase: addDestinationToTripUseCase,
       getTripItinerariesUseCase: getTripItinerariesUseCase,
       removeDestinationFromTripUseCase: removeDestinationFromTripUseCase,
+      updateTripChecklistUseCase: updateTripChecklistUseCase,
     );
 
     // Schedule Matching Initialization
@@ -285,6 +291,9 @@ void main() async {
   } catch (e) {
     debugPrint("Warning: .env file not found. Using empty or fallback values.");
   }
+
+  // Initialize SharedPreferences
+  config.sharedPreferences = await SharedPreferences.getInstance();
 
   // Initialize Supabase
   await Supabase.initialize(

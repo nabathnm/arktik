@@ -14,71 +14,102 @@ class TripMembersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Trip Members', style: LivestTypography.h3),
-        backgroundColor: AppColors.baseWhite,
-        elevation: 1,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        title: const Text(
+          'Peserta Trip',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        centerTitle: true,
       ),
       body: Consumer<TripProvider>(
         builder: (context, provider, child) {
-          final leader = provider.leader;
-          final members = provider.members.where((m) => m.role == TripMemberRole.member).toList();
+          final trip = provider.currentTrip;
+          if (trip == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          return Column(
             children: [
-              const Text('LEADER', style: LivestTypography.captionBold),
-              const SizedBox(height: 8),
-              if (leader != null) _buildMemberCard(context, leader, isLeader: true),
-              const SizedBox(height: 24),
-              const Text('MEMBERS', style: LivestTypography.captionBold),
-              const SizedBox(height: 8),
-              ...members.map((m) => _buildMemberCard(context, m)).toList(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  itemCount: provider.members.length,
+                  itemBuilder: (context, index) {
+                    final member = provider.members[index];
+                    final isMemberLeader = member.role == TripMemberRole.owner;
+
+                    return GestureDetector(
+                      onTap: () => context.push(
+                        '/trip/$tripId/members/${member.userId}',
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: Colors.grey.shade400,
+                            width: 1,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey.shade200,
+                              backgroundImage: member.avatarUrl != null
+                                  ? NetworkImage(member.avatarUrl!)
+                                  : null,
+                              child: member.avatarUrl == null
+                                  ? const Icon(Icons.person, color: Colors.grey)
+                                  : null,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                member.name ?? 'Unknown Member',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            if (isMemberLeader)
+                              const Icon(
+                                Icons.star,
+                                size: 14,
+                                color: Colors.black54,
+                              ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '• ${isMemberLeader ? 'Group Leader' : 'Member'}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontWeight: isMemberLeader
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildMemberCard(BuildContext context, TripMemberEntity member, {bool isLeader = false}) {
-    return GestureDetector(
-      onTap: () => context.push('/trip/$tripId/members/${member.userId}'),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.baseWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isLeader ? AppColors.primary : AppColors.neutralLightActive),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: AppColors.neutralLightActive,
-              backgroundImage: member.avatarUrl != null ? NetworkImage(member.avatarUrl!) : null,
-              child: member.avatarUrl == null ? const Icon(Icons.person, color: AppColors.textSecondary) : null,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(member.name ?? 'Unknown', style: LivestTypography.h3),
-                  Text(
-                    isLeader ? 'Trip Leader' : 'Member',
-                    style: LivestTypography.bodySm.copyWith(
-                      color: isLeader ? AppColors.primary : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isLeader) const Text('👑', style: TextStyle(fontSize: 20)),
-          ],
-        ),
       ),
     );
   }

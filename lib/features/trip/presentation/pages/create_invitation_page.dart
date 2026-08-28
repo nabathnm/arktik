@@ -64,10 +64,9 @@ class _CreateInvitationPageState extends State<CreateInvitationPage> {
       final success = await context
           .read<InvitationProvider>()
           .createNewInvitation(
-            title: _titleController.text.trim(),
-            description: _descriptionController.text.trim(),
             maxMembers: int.parse(_maxMembersController.text),
             expiresAt: expiresAt,
+            tripId: 'dummy-trip-id', // Deprecated page
           );
 
       if (success && mounted) {

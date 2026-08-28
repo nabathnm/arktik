@@ -35,7 +35,7 @@ class _JoinInvitationPageState extends State<JoinInvitationPage> {
       builder: (context) => AlertDialog(
         title: const Text('Hubungkan Kalender?'),
         content: const Text(
-          'Agar kami dapat mencocokkan jadwal Anda dengan anggota trip lainnya secara akurat, izinkan kami mengimpor jadwal kosong Anda dari Google Calendar.'
+          'Agar kami dapat mencocokkan jadwal Anda dengan anggota trip lainnya secara akurat, izinkan kami mengimpor jadwal kosong Anda dari Google Calendar.',
         ),
         actions: [
           TextButton(
@@ -120,7 +120,7 @@ class _JoinInvitationPageState extends State<JoinInvitationPage> {
               textCapitalization: TextCapitalization.characters,
               inputFormatters: [UpperCaseTextFormatter()],
               decoration: InputDecoration(
-                hintText: 'XXXX-XXXXX',
+                hintText: 'XXXXXX',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

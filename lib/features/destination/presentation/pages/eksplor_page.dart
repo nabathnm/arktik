@@ -36,30 +36,30 @@ class _EksplorPageState extends State<EksplorPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 20),
-              child: Text(
-                'Rekomendasi Tempat Wisata',
-                style: LivestTypography.textLg.copyWith(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await context.read<DestinationProvider>().fetchDestinations();
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Text(
+                    'Rekomendasi Tempat Wisata',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.textLg.copyWith(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await context.read<DestinationProvider>().fetchDestinations();
-                },
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [_buildSearchBox(), _buildContent()],
-                ),
-              ),
-            ),
-          ],
+              _buildSearchBox(),
+              _buildContent(),
+            ],
+          ),
         ),
       ),
     );
@@ -151,7 +151,7 @@ class _EksplorPageState extends State<EksplorPage> {
                     children: [
                       Text(
                         dest.name,
-                        style: LivestTypography.bodyLgMedium.copyWith(
+                        style: AppTypography.bodyLgMedium.copyWith(
                           color: Colors.black,
                         ),
                         maxLines: 1,
@@ -168,7 +168,7 @@ class _EksplorPageState extends State<EksplorPage> {
                           const SizedBox(width: 4),
                           Text(
                             '4.8 (2.021)', // Mock rating
-                            style: LivestTypography.caption.copyWith(
+                            style: AppTypography.caption.copyWith(
                               color: Colors.grey.shade700,
                             ),
                           ),
@@ -179,7 +179,7 @@ class _EksplorPageState extends State<EksplorPage> {
                         dest.type == DestinationType.tourism
                             ? 'Wisata dan alam'
                             : 'Hotel dan restoran',
-                        style: LivestTypography.caption.copyWith(
+                        style: AppTypography.caption.copyWith(
                           color: Colors.grey.shade600,
                         ),
                       ),

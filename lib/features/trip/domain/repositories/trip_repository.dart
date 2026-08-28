@@ -40,4 +40,6 @@ abstract class TripRepository {
   });
 
   Future<void> removeDestinationFromTrip(String itineraryId);
+
+  Future<void> updateTripChecklist(String tripId, List<bool> checklist);
 }

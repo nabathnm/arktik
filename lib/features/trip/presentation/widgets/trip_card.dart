@@ -49,9 +49,10 @@ class TripCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 15,
+              spreadRadius: 2,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -66,7 +67,7 @@ class TripCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     'https://picsum.photos/seed/${trip.id}/200', // Placeholder image
-                    width: 80,
+                    width: 70,
                     height: 80,
                     fit: BoxFit.cover,
                   ),
@@ -77,29 +78,20 @@ class TripCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Text(
-                            '🇺🇸',
-                            style: TextStyle(fontSize: 16),
-                          ), // Placeholder flag
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              trip.name,
-                              style: LivestTypography.h3,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
                       Text(
-                        '${trip.startDate != null ? dateFormat.format(trip.startDate!) : "-"} - ${trip.endDate != null ? dateFormat.format(trip.endDate!) : "-"}',
-                        style: LivestTypography.bodySm.copyWith(
-                          color: AppColors.textSecondary,
+                        trip.name,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        trip.startDate != null && trip.endDate != null
+                            ? '${dateFormat.format(trip.startDate!)} - ${dateFormat.format(trip.endDate!)}'
+                            : 'Tanggal belum ditentukan',
+                        style: TextStyle(fontSize: 12),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -108,14 +100,12 @@ class TripCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(
-                            0.5,
-                          ), // Match badge color from design (blueish)
+                          color: Colors.lightBlue.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           '$duration Hari',
-                          style: LivestTypography.captionBold.copyWith(
+                          style: AppTypography.captionBold.copyWith(
                             color: AppColors.baseWhite,
                           ),
                         ),
@@ -129,14 +119,22 @@ class TripCard extends StatelessWidget {
             // Progress Section
             RichText(
               text: TextSpan(
-                style: LivestTypography.bodySm.copyWith(
+                style: AppTypography.bodySm.copyWith(
                   color: AppColors.textSecondary,
                 ),
                 children: [
-                  const TextSpan(text: 'Progres: '),
                   TextSpan(
-                    text: '$progressPercent% Selesai',
+                    text: 'Progres: ',
                     style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' $progressPercent% Selesai',
+                    style: const TextStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),

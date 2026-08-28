@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/trip/domain/entities/trip_entity.dart';
 import 'package:rantau/features/destination/presentation/pages/eksplor_page.dart';
+import 'package:rantau/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:rantau/main.dart';
-import '../../features/google_calendar/presentation/pages/google_calendar_test_page.dart';
 import '../../features/google_calendar/presentation/pages/availability_calendar_page.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
@@ -15,14 +16,15 @@ import '../../features/destination/presentation/pages/create_destination_page.da
 import '../../features/destination/presentation/pages/destination_detail_placeholder_page.dart';
 import '../../features/trip/presentation/pages/create_invitation_page.dart';
 import '../../features/trip/presentation/pages/join_invitation_page.dart';
-import '../../features/trip/presentation/pages/invitation_detail_page.dart';
 import '../../features/beranda/presentation/pages/beranda_page.dart';
 import '../../features/trip/presentation/pages/create_trip_page.dart';
+import '../../features/trip/presentation/pages/share_token_page.dart';
 import '../../features/trip/presentation/pages/my_trips_page.dart';
 import '../../features/trip/presentation/pages/trip_detail_page.dart';
 import '../../features/trip/presentation/pages/trip_members_page.dart';
 import '../../features/trip/presentation/pages/member_detail_page.dart';
 import '../../features/trip/presentation/pages/schedule_matching_page.dart';
+import '../../features/trip/presentation/pages/trip_checklist_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 
 class AppRouter {
@@ -31,11 +33,26 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/auth',
+    initialLocation: '/onboarding',
     refreshListenable: config.authProvider,
     redirect: (context, state) {
       final authStatus = config.authProvider.status;
       final isAuthRoute = state.matchedLocation == '/auth';
+      final isOnboardingRoute = state.matchedLocation == '/onboarding';
+
+      // Check if onboarding is completed
+      final onboardingCompleted =
+          config.sharedPreferences.getBool('onboarding_completed') ?? false;
+
+      // If onboarding not completed, stay on onboarding
+      if (!onboardingCompleted) {
+        return isOnboardingRoute ? null : '/onboarding';
+      }
+
+      // If onboarding completed, skip onboarding route
+      if (isOnboardingRoute) {
+        return '/auth';
+      }
 
       if (authStatus == AuthStateStatus.unauthenticated ||
           authStatus == AuthStateStatus.initial ||
@@ -69,13 +86,14 @@ class AppRouter {
     },
     routes: [
       GoRoute(
+        path: '/onboarding',
+        name: "onboarding",
+        builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
         path: '/auth',
         name: "auth",
         builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: '/google-calendar-test',
-        builder: (context, state) => const GoogleCalendarTestPage(),
       ),
       GoRoute(
         path: '/destination/:id',
@@ -147,6 +165,13 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/trip/:tripId/checklist',
+        builder: (context, state) {
+          final id = state.pathParameters['tripId']!;
+          return TripChecklistPage(tripId: id);
+        },
+      ),
+      GoRoute(
         path: '/trip/:tripId/explore',
         builder: (context, state) => const EksplorPage(),
       ),
@@ -170,19 +195,19 @@ class AppRouter {
         builder: (context, state) => const CreateTripPage(),
       ),
       GoRoute(
+        path: '/trip-share',
+        builder: (context, state) {
+          final trip = state.extra as TripEntity;
+          return ShareTokenPage(trip: trip);
+        },
+      ),
+      GoRoute(
         path: '/user/create-invitation',
         builder: (context, state) => const CreateInvitationPage(),
       ),
       GoRoute(
         path: '/user/join-invitation',
         builder: (context, state) => const JoinInvitationPage(),
-      ),
-      GoRoute(
-        path: '/user/invitation/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return InvitationDetailPage(invitationId: id);
-        },
       ),
       GoRoute(
         path: '/trip/:id/level-1',

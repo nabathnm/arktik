@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/app_loading.dart';
 import '../providers/schedule_matching_provider.dart';
 import '../providers/trip_provider.dart';
-import '../../domain/entities/candidate_date_entity.dart';
 
 class TripDateSelectionDialog extends StatefulWidget {
   final String tripId;
@@ -13,13 +11,13 @@ class TripDateSelectionDialog extends StatefulWidget {
   const TripDateSelectionDialog({super.key, required this.tripId});
 
   @override
-  State<TripDateSelectionDialog> createState() => _TripDateSelectionDialogState();
+  State<TripDateSelectionDialog> createState() =>
+      _TripDateSelectionDialogState();
 }
 
 class _TripDateSelectionDialogState extends State<TripDateSelectionDialog> {
-  DateTime? _selectedStartDate;
-  DateTime? _selectedEndDate;
-  DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  DateTime? _start;
+  DateTime? _end;
   bool _showCalendar = false;
 
   @override
@@ -27,121 +25,171 @@ class _TripDateSelectionDialogState extends State<TripDateSelectionDialog> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ScheduleMatchingProvider>();
-      provider.setSearchPeriod(DateTime.now(), DateTime.now().add(const Duration(days: 90)));
+      // Default search period: today to next 2 months
+      provider.setSearchPeriod(
+        DateTime.now(),
+        DateTime.now().add(const Duration(days: 60)),
+      );
       provider.findAvailableDates(widget.tripId);
     });
   }
 
-  void _onSaveSchedule() async {
-    if (_selectedStartDate == null || _selectedEndDate == null) return;
+  void _onDateSelected(DateTime selected) {
+    setState(() {
+      if (_start == null) {
+        _start = selected;
+      } else if (_end == null) {
+        if (selected.isBefore(_start!)) {
+          _end = _start;
+          _start = selected;
+        } else {
+          _end = selected;
+        }
+      } else {
+        _start = selected;
+        _end = null;
+      }
+    });
+  }
+
+  Future<void> _onSave() async {
+    if (_start == null || _end == null) return;
     try {
       await context.read<ScheduleMatchingProvider>().selectTripDateRange(
-        widget.tripId, 
-        _selectedStartDate!, 
-        _selectedEndDate!
+        widget.tripId,
+        _start!,
+        _end!,
       );
       if (mounted) {
         context.read<TripProvider>().loadTripDetails(widget.tripId);
-        Navigator.pop(context, true);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Jadwal berhasil disimpan!')),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan jadwal: $e')));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.baseWhite,
-          borderRadius: BorderRadius.circular(16),
-        ),
+    final dateFormat = DateFormat('MM/dd/yyyy');
+    final isLoading =
+        context.watch<ScheduleMatchingProvider>().status ==
+        ScheduleMatchingStatus.loading;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Container(
-              width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: const BoxDecoration(
-                color: Color(0xFF867DA6), // Muted purple as per screenshot
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
+                color: Color(0xFF8F8BB0), // Soft purple for header
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
-              child: const Text(
-                'Pilih Tanggal Trip',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              child: const Center(
+                child: Text(
+                  'Pilih Tanggal Trip',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
-            
-            // Content
+
+            // Date Inputs
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
                   _buildDateField(
-                    label: _selectedStartDate != null 
-                        ? DateFormat('MM/dd/yyyy').format(_selectedStartDate!)
+                    label: _start != null
+                        ? dateFormat.format(_start!)
                         : 'mm/dd/yyyy',
-                    onTap: () {
-                      setState(() {
-                        _showCalendar = !_showCalendar;
-                      });
-                    },
+                    isActive: _start != null,
+                    onTap: () => setState(() => _showCalendar = true),
                   ),
-                  const SizedBox(height: 12),
-                  const Text('To', style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 12),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text(
+                      'To',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
                   _buildDateField(
-                    label: _selectedEndDate != null 
-                        ? DateFormat('MM/dd/yyyy').format(_selectedEndDate!)
+                    label: _end != null
+                        ? dateFormat.format(_end!)
                         : 'mm/dd/yyyy',
-                    onTap: () {
-                      setState(() {
-                        _showCalendar = !_showCalendar;
-                      });
-                    },
+                    isActive: _end != null,
+                    onTap: () => setState(() => _showCalendar = true),
                   ),
 
                   if (_showCalendar) ...[
-                    const SizedBox(height: 16),
-                    _buildCustomCalendar(),
+                    const SizedBox(height: 24),
+                    _CustomMockCalendar(
+                      selectedStart: _start,
+                      selectedEnd: _end,
+                      onDateSelected: _onDateSelected,
+                    ),
                   ],
 
-                  if (!_showCalendar && _selectedStartDate != null && _selectedEndDate != null) ...[
+                  if (_start != null && _end != null) ...[
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _onSaveSchedule,
+                        onPressed: isLoading ? null : _onSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2C1959), // Dark purple
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: const Color(0xFF26225B),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Simpan Jadwal',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Simpan Jadwal',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
-                  ]
+                  ],
                 ],
               ),
             ),
@@ -151,264 +199,299 @@ class _TripDateSelectionDialogState extends State<TripDateSelectionDialog> {
     );
   }
 
-  Widget _buildDateField({required String label, required VoidCallback onTap}) {
+  Widget _buildDateField({
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: 200,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: const BoxDecoration(
-          color: Colors.transparent,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
+              style: TextStyle(
+                color: isActive ? Colors.black87 : Colors.grey,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+              ),
             ),
-            const SizedBox(width: 16),
-            const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.black87),
+            const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildCustomCalendar() {
-    return Consumer<ScheduleMatchingProvider>(
-      builder: (context, provider, child) {
-        if (provider.status == ScheduleMatchingStatus.loading) {
-          return const Padding(
-            padding: EdgeInsets.all(24.0),
-            child: AppLoading(),
-          );
-        }
+class _CustomMockCalendar extends StatefulWidget {
+  final DateTime? selectedStart;
+  final DateTime? selectedEnd;
+  final ValueChanged<DateTime> onDateSelected;
 
-        final candidates = provider.candidateDates;
-        
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ]
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    DateFormat('MMMM yyyy').format(_currentMonth),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left, size: 20),
-                        onPressed: () {
-                          setState(() {
-                            _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1, 1);
-                          });
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right, size: 20),
-                        onPressed: () {
-                          setState(() {
-                            _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 1);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => Expanded(
-                  child: Text(
-                    day,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                )).toList(),
-              ),
-              const SizedBox(height: 8),
-              _buildCalendarGrid(candidates),
-              const SizedBox(height: 16),
-              // Legend
-              Row(
-                children: [
-                  Container(
-                    width: 12, height: 12,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Bentrok dengan kegiatan lain',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _showCalendar = false;
-                      });
-                    },
-                    child: const Text('Tutup', style: TextStyle(color: Colors.blue)),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _showCalendar = false;
-                      });
-                    },
-                    child: const Text('Pilih', style: TextStyle(color: Colors.blue)),
-                  ),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
+  const _CustomMockCalendar({
+    required this.selectedStart,
+    required this.selectedEnd,
+    required this.onDateSelected,
+  });
+
+  @override
+  State<_CustomMockCalendar> createState() => _CustomMockCalendarState();
+}
+
+class _CustomMockCalendarState extends State<_CustomMockCalendar> {
+  DateTime _currentMonth = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    1,
+  );
+
+  bool _isClashDate(DateTime date) {
+    final candidateDates = context
+        .read<ScheduleMatchingProvider>()
+        .candidateDates;
+    try {
+      final candidate = candidateDates.firstWhere(
+        (c) => DateUtils.isSameDay(c.date, date),
+      );
+      return candidate.availabilityPercentage < 100;
+    } catch (_) {
+      return false; // No data means no clash known, or could treat as clash. Let's say false.
+    }
   }
 
-  Widget _buildCalendarGrid(List<CandidateDateEntity> candidates) {
-    final daysInMonth = DateUtils.getDaysInMonth(_currentMonth.year, _currentMonth.month);
-    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
-    int firstWeekday = firstDayOfMonth.weekday % 7; 
-    
-    int totalCells = 42; 
+  @override
+  Widget build(BuildContext context) {
+    final daysInMonth = DateUtils.getDaysInMonth(
+      _currentMonth.year,
+      _currentMonth.month,
+    );
+    final firstDayOffset = _currentMonth.weekday % 7; // Sunday = 0
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        childAspectRatio: 1.0, 
+    // Listen to changes in case candidate dates are loaded
+    context.watch<ScheduleMatchingProvider>();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
-      itemCount: totalCells,
-      itemBuilder: (context, index) {
-        int dayOffset = index - firstWeekday + 1;
-        bool isCurrentMonth = dayOffset > 0 && dayOffset <= daysInMonth;
-        
-        if (!isCurrentMonth) {
-          DateTime cellDate;
-          if (dayOffset <= 0) {
-            cellDate = DateTime(_currentMonth.year, _currentMonth.month - 1, DateUtils.getDaysInMonth(_currentMonth.year, _currentMonth.month - 1) + dayOffset);
-          } else {
-            cellDate = DateTime(_currentMonth.year, _currentMonth.month + 1, dayOffset - daysInMonth);
-          }
-          return Center(
-            child: Text('${cellDate.day}', style: const TextStyle(color: Colors.grey)),
-          );
-        }
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Month Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                DateFormat('MMMM yyyy').format(_currentMonth),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, size: 20),
+                    onPressed: () {
+                      setState(() {
+                        _currentMonth = DateTime(
+                          _currentMonth.year,
+                          _currentMonth.month - 1,
+                          1,
+                        );
+                      });
+                    },
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, size: 20),
+                    onPressed: () {
+                      setState(() {
+                        _currentMonth = DateTime(
+                          _currentMonth.year,
+                          _currentMonth.month + 1,
+                          1,
+                        );
+                      });
+                    },
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
 
-        DateTime cellDate = DateTime(_currentMonth.year, _currentMonth.month, dayOffset);
-        
-        CandidateDateEntity? candidate;
-        try {
-          candidate = candidates.firstWhere((c) => DateUtils.isSameDay(c.date, cellDate));
-        } catch (_) {}
+          // Days of week
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+                .map(
+                  (d) => Text(
+                    d,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 8),
 
-        bool isSelectedStart = _selectedStartDate != null && DateUtils.isSameDay(cellDate, _selectedStartDate!);
-        bool isSelectedEnd = _selectedEndDate != null && DateUtils.isSameDay(cellDate, _selectedEndDate!);
-        
-        bool isInRange = false;
-        if (_selectedStartDate != null && _selectedEndDate != null) {
-          if ((cellDate.isAfter(_selectedStartDate!) && cellDate.isBefore(_selectedEndDate!)) ||
-              DateUtils.isSameDay(cellDate, _selectedStartDate!) ||
-              DateUtils.isSameDay(cellDate, _selectedEndDate!)) {
-            isInRange = true;
-          }
-        } else if (isSelectedStart) {
-          isInRange = true;
-        }
-
-        bool hasConflict = false;
-        if (candidate != null && candidate.availabilityPercentage < 100) {
-          hasConflict = true; // Bentrok
-        }
-
-        Color textColor = Colors.black87;
-        Color boxColor = Colors.transparent;
-
-        if (isInRange) {
-          textColor = Colors.blueAccent;
-          boxColor = Colors.blue.withOpacity(0.1);
-        }
-
-        if (isSelectedStart || isSelectedEnd) {
-          textColor = Colors.white;
-          boxColor = Colors.blueAccent;
-        }
-
-        if (hasConflict && !isSelectedStart && !isSelectedEnd) {
-           textColor = Colors.red;
-        }
-
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              if (_selectedStartDate == null || (_selectedStartDate != null && _selectedEndDate != null)) {
-                _selectedStartDate = cellDate;
-                _selectedEndDate = null;
-              } else if (cellDate.isBefore(_selectedStartDate!)) {
-                _selectedStartDate = cellDate;
-              } else {
-                _selectedEndDate = cellDate;
-              }
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: boxColor,
-              shape: BoxShape.circle,
+          // Calendar Grid
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 1.0,
             ),
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${cellDate.day}',
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: (isSelectedStart || isSelectedEnd) ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 14,
+            itemCount: 42,
+            itemBuilder: (context, index) {
+              final dayNum = index - firstDayOffset + 1;
+              if (dayNum < 1 || dayNum > daysInMonth) {
+                return const SizedBox();
+              }
+
+              final date = DateTime(
+                _currentMonth.year,
+                _currentMonth.month,
+                dayNum,
+              );
+              final isClash = _isClashDate(date);
+
+              bool isSelected = false;
+              bool isInRange = false;
+
+              if (widget.selectedStart != null &&
+                  date.isAtSameMomentAs(widget.selectedStart!)) {
+                isSelected = true;
+              }
+              if (widget.selectedEnd != null &&
+                  date.isAtSameMomentAs(widget.selectedEnd!)) {
+                isSelected = true;
+              }
+              if (widget.selectedStart != null && widget.selectedEnd != null) {
+                if (date.isAfter(widget.selectedStart!) &&
+                    date.isBefore(widget.selectedEnd!)) {
+                  isInRange = true;
+                }
+              }
+
+              // Disabling clash dates from being selected? Mockup just says "Bentrok", let's allow it but warn,
+              // or disable. The plan says "indikator titik merah". It doesn't explicitly disable.
+              // Let's add a small red dot underneath the text if it's a clash.
+
+              return GestureDetector(
+                onTap: () => widget.onDateSelected(date),
+                child: Container(
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected
+                        ? Colors.blue
+                        : isInRange
+                        ? Colors.blue.withOpacity(0.2)
+                        : Colors.transparent,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dayNum.toString(),
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : (isInRange ? Colors.blue : Colors.black87),
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          height: 1.0, // prevent huge gaps
+                        ),
+                      ),
+                      if (isClash)
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          width: 4,
+                          height: 4,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                if (hasConflict)
-                  Container(
-                    margin: const EdgeInsets.only(top: 2),
-                    width: 4, height: 4,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  )
-              ],
-            ),
+              );
+            },
           ),
-        );
-      },
+
+          const SizedBox(height: 8),
+          const Row(
+            children: [
+              Icon(Icons.circle, color: Colors.red, size: 8),
+              SizedBox(width: 8),
+              Text(
+                'Bentrok dengan kegiatan lain',
+                style: TextStyle(color: Colors.red, fontSize: 10),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => setState(
+                  () =>
+                      context
+                              .findAncestorStateOfType<
+                                _TripDateSelectionDialogState
+                              >()!
+                              ._showCalendar =
+                          false,
+                ),
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () => setState(
+                  () =>
+                      context
+                              .findAncestorStateOfType<
+                                _TripDateSelectionDialogState
+                              >()!
+                              ._showCalendar =
+                          false,
+                ),
+                child: const Text(
+                  'Pilih',
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

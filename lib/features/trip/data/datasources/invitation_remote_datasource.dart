@@ -5,11 +5,9 @@ import '../models/invitation_member_model.dart';
 
 abstract class InvitationRemoteDataSource {
   Future<InvitationModel> createInvitation({
-    required String title,
-    String? description,
     required int maxMembers,
     required DateTime expiresAt,
-    String? tripId,
+    required String tripId,
   });
   Future<InvitationModel?> getInvitationByCode(String code);
   Future<InvitationModel> joinInvitation(String code);
@@ -27,22 +25,16 @@ class InvitationRemoteDataSourceImpl implements InvitationRemoteDataSource {
   String _generateCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluded I, O, 0, 1
     final rnd = Random.secure();
-    final String part1 = String.fromCharCodes(
-      Iterable.generate(4, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
+    return String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
     );
-    final String part2 = String.fromCharCodes(
-      Iterable.generate(5, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
-    );
-    return '$part1-$part2'; // format: XXXX-XXXXX
   }
 
   @override
   Future<InvitationModel> createInvitation({
-    required String title,
-    String? description,
     required int maxMembers,
     required DateTime expiresAt,
-    String? tripId,
+    required String tripId,
   }) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Not authenticated');
@@ -51,16 +43,10 @@ class InvitationRemoteDataSourceImpl implements InvitationRemoteDataSource {
 
     final insertData = {
       'code': code,
-      'created_by': userId,
-      'title': title,
-      'description': description,
+      'trip_id': tripId,
       'max_members': maxMembers,
       'expires_at': expiresAt.toUtc().toIso8601String(),
     };
-
-    if (tripId != null) {
-      insertData['trip_id'] = tripId;
-    }
 
     final data = await supabase
         .from('invitations')
@@ -88,7 +74,7 @@ class InvitationRemoteDataSourceImpl implements InvitationRemoteDataSource {
   Future<InvitationModel> joinInvitation(String code) async {
     final normalizedCode = code.trim().toUpperCase();
 
-    // Call the RPC function
+    // Call the RPC function (Runs as SECURITY DEFINER to bypass RLS)
     final response = await supabase.rpc(
       'join_trip_with_code',
       params: {'p_code': normalizedCode},

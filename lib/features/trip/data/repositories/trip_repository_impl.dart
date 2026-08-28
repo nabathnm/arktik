@@ -94,4 +94,9 @@ class TripRepositoryImpl implements TripRepository {
   Future<void> removeDestinationFromTrip(String itineraryId) async {
     return await remoteDataSource.removeDestinationFromTrip(itineraryId);
   }
+
+  @override
+  Future<void> updateTripChecklist(String tripId, List<bool> checklist) async {
+    return await remoteDataSource.updateTripChecklist(tripId, checklist);
+  }
 }

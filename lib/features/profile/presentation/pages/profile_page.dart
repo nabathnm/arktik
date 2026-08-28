@@ -149,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
             const SizedBox(height: 24),
-            const Divider(color: Colors.black12, thickness: 1),
+            const Divider(color: Colors.black, thickness: 0.5),
             const SizedBox(height: 24),
 
             // Notification Toggle

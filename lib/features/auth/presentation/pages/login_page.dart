@@ -8,7 +8,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -20,12 +20,13 @@ class LoginPage extends StatelessWidget {
               // Logo
               Center(
                 child: Image.asset(
-                  "assets/images/splash/arktik.png",
+                  "assets/images/icon/arktik_black.png",
                   width: 200, // Menyesuaikan ukuran logo
                 ),
               ),
-              const Spacer(flex: 2),
-              
+              // const Spacar(flex: 2),
+              SizedBox(height: 50),
+
               // Error Message
               if (authProvider.status == AuthStateStatus.error) ...[
                 Text(
@@ -35,7 +36,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Google Login Button
               SizedBox(
                 width: double.infinity,
@@ -81,9 +82,9 @@ class LoginPage extends StatelessWidget {
                         ),
                 ),
               ),
-              
+
               const Spacer(flex: 4),
-              
+
               // Terms & Conditions Text
               RichText(
                 textAlign: TextAlign.center,

@@ -10,15 +10,11 @@ class InvitationRepositoryImpl implements InvitationRepository {
 
   @override
   Future<InvitationEntity> createInvitation({
-    required String title,
-    String? description,
     required int maxMembers,
     required DateTime expiresAt,
-    String? tripId,
+    required String tripId,
   }) async {
     return await remoteDataSource.createInvitation(
-      title: title,
-      description: description,
       maxMembers: maxMembers,
       expiresAt: expiresAt,
       tripId: tripId,
