@@ -70,6 +70,7 @@ import 'features/trip/data/repositories/schedule_matching_repository_impl.dart';
 import 'features/trip/domain/usecases/find_available_dates_usecase.dart';
 import 'features/trip/domain/usecases/select_trip_date_usecase.dart';
 import 'features/trip/presentation/providers/schedule_matching_provider.dart';
+
 class Config {
   Config();
 
@@ -147,6 +148,7 @@ class Config {
     supabase = Supabase.instance.client;
     googleSignIn = GoogleSignIn(
       clientId: kIsWeb ? EnvConstants.googleWebClientId : null,
+      serverClientId: EnvConstants.googleWebClientId,
       scopes: [
         'email',
         'https://www.googleapis.com/auth/calendar.events',
@@ -181,7 +183,10 @@ class Config {
 
     // Google Calendar Initialization
     calendarRemoteDataSource = GoogleCalendarRemoteDataSourceImpl(googleSignIn);
-    calendarRepository = GoogleCalendarRepositoryImpl(calendarRemoteDataSource, supabase);
+    calendarRepository = GoogleCalendarRepositoryImpl(
+      calendarRemoteDataSource,
+      supabase,
+    );
 
     getCalendarEvents = GetCalendarEvents(calendarRepository);
     createCalendarEvent = CreateCalendarEvent(calendarRepository);
@@ -242,9 +247,13 @@ class Config {
     removeTripMemberUseCase = RemoveTripMemberUseCase(tripRepository);
     leaveTripUseCase = LeaveTripUseCase(tripRepository);
     deleteTripUseCase = DeleteTripUseCase(tripRepository);
-    final addDestinationToTripUseCase = AddDestinationToTripUseCase(tripRepository);
+    final addDestinationToTripUseCase = AddDestinationToTripUseCase(
+      tripRepository,
+    );
     final getTripItinerariesUseCase = GetTripItinerariesUseCase(tripRepository);
-    final removeDestinationFromTripUseCase = RemoveDestinationFromTripUseCase(tripRepository);
+    final removeDestinationFromTripUseCase = RemoveDestinationFromTripUseCase(
+      tripRepository,
+    );
     updateTripChecklistUseCase = UpdateTripChecklistUseCase(tripRepository);
 
     tripProvider = TripProvider(
@@ -269,9 +278,11 @@ class Config {
       tripRepository,
       calendarRepository,
     );
-    findAvailableDatesUseCase = FindAvailableDatesUseCase(scheduleMatchingRepository);
+    findAvailableDatesUseCase = FindAvailableDatesUseCase(
+      scheduleMatchingRepository,
+    );
     selectTripDateUseCase = SelectTripDateUseCase(scheduleMatchingRepository);
-    
+
     scheduleMatchingProvider = ScheduleMatchingProvider(
       findAvailableDatesUseCase: findAvailableDatesUseCase,
       selectTripDateUseCase: selectTripDateUseCase,
