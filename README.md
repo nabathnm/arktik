@@ -132,6 +132,6 @@ To get a local copy up and running, follow these simple steps.
 
 | Name | Role | Responsibilities | Contact |
 | --- | --- | --- | --- |
-| [FULL_NAME] | Product Manager | Overseeing project requirements and timeline | [GitHub / LinkedIn] |
-| [FULL_NAME] | UI/UX Designer | Designing application interfaces and user flows | [GitHub / LinkedIn] |
-| [FULL_NAME] | Mobile Engineer | Developing the Flutter application and integration | [GitHub / LinkedIn] |
+| Shelfina Khayla Anindita | Product Manager | Overseeing project requirements and timeline | [GitHub / LinkedIn] |
+| Naufaldo Dafa Zaki Bastian | UI/UX Designer | Designing application interfaces and user flows | [GitHub / LinkedIn] |
+| Nabath Nur Muhammad | Mobile Engineer | Developing the Flutter application and integration | [GitHub / LinkedIn] |
