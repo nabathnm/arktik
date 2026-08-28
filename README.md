@@ -52,7 +52,7 @@ Arktik is a digital platform designed for travelers and groups who need an effic
 | Category | Technology | Purpose |
 | --- | --- | --- |
 | Frontend | Flutter (Dart) | UI Framework for building cross-platform applications |
-| Architecture | Clean Architecture | Ensures separation of concerns and maintainable code |
+| Architecture | Feature-First Clean Architecture | Modular structure organized by feature, utilizing Clean Architecture internally |
 | State Management | Provider | Efficient and scalable state management for app features |
 | Backend | Supabase | Backend-as-a-Service providing secure and scalable infrastructure |
 | Database | PostgreSQL (Supabase) | Relational database for storing trips, members, and itineraries |
@@ -70,7 +70,7 @@ Arktik is a digital platform designed for travelers and groups who need an effic
 │   │   └── ...       # Other feature modules
 │   └── main.dart     # Entry point of the application
 ├── assets/           # Images, icons, fonts, and static assets
-├── supabase/         # Database schemas and edge functions
+├── supabase/         # Database schemas
 └── pubspec.yaml      # Project dependencies and configurations
 ```
 
@@ -88,23 +88,40 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repo**
     ```sh
-    git clone https://github.com/[PROFILE]/[REPOSITORY].git
+    git clone https://github.com/nabathnm/arktik.git
     ```
 2.  **Navigate to the project directory**
     ```sh
-    cd [DIRECTORY]
+    cd arktik
     ```
-3.  **Setup Environment Variables**
-    Create a `.env` file in the root directory and add your Supabase credentials:
+3.  **Configure Google Cloud Console (OAuth & Calendar API)**
+    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    * Create a new project.
+    * Navigate to **APIs & Services > Library** and enable the **Google Calendar API**.
+    * Navigate to **APIs & Services > OAuth consent screen** and configure it (Add your test users if in testing mode). Make sure to add the Calendar scopes (`https://www.googleapis.com/auth/calendar` or `https://www.googleapis.com/auth/calendar.events`).
+    * Navigate to **APIs & Services > Credentials** and create an **OAuth 2.0 Client ID** (Web application).
+    * Copy the **Client ID** and **Client Secret**.
+
+4.  **Configure Supabase Authentication**
+    * Go to your [Supabase Dashboard](https://supabase.com/dashboard).
+    * Navigate to **Authentication > Providers** and enable **Google**.
+    * Paste the **Client ID** and **Client Secret** obtained from Google Cloud Console.
+    * Copy the **Callback URL (for OAuth)** from Supabase and paste it into the **Authorized redirect URIs** in your Google Cloud Console's Web Client ID settings.
+
+5.  **Setup Environment Variables**
+    Create a `.env` file in the root directory and add your credentials:
     ```env
     SUPABASE_URL=your_supabase_url
     SUPABASE_ANON_KEY=your_supabase_anon_key
+    GOOGLE_WEB_CLIENT_ID=your_google_web_client_id
     ```
-4.  **Install dependencies**
+    *(Note: The `GOOGLE_WEB_CLIENT_ID` should be the same Web Client ID you created in Google Cloud Console.)*
+
+6.  **Install dependencies**
     ```sh
     flutter pub get
     ```
-5.  **Run the app**
+7.  **Run the app**
     ```sh
     flutter run
     ```
