@@ -148,7 +148,7 @@ class Config {
     supabase = Supabase.instance.client;
     googleSignIn = GoogleSignIn(
       clientId: kIsWeb ? EnvConstants.googleWebClientId : null,
-      serverClientId: EnvConstants.googleWebClientId,
+      serverClientId: kIsWeb ? null : EnvConstants.googleWebClientId,
       scopes: [
         'email',
         'https://www.googleapis.com/auth/calendar.events',

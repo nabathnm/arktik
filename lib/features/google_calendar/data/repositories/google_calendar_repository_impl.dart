@@ -17,14 +17,18 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
   Future<List<CalendarEventEntity>> getEvents() async {
     try {
       final googleEvents = await remoteDataSource.getEvents();
-      return googleEvents.map((e) => CalendarEventModel.fromGoogleEvent(e)).toList();
+      return googleEvents
+          .map((e) => CalendarEventModel.fromGoogleEvent(e))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
 
   @override
-  Future<CalendarEventEntity> createEvent({required CalendarEventEntity event}) async {
+  Future<CalendarEventEntity> createEvent({
+    required CalendarEventEntity event,
+  }) async {
     try {
       final model = CalendarEventModel(
         id: event.id,
@@ -41,7 +45,9 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
   }
 
   @override
-  Future<CalendarEventEntity> updateEvent({required CalendarEventEntity event}) async {
+  Future<CalendarEventEntity> updateEvent({
+    required CalendarEventEntity event,
+  }) async {
     try {
       final model = CalendarEventModel(
         id: event.id,
@@ -93,15 +99,25 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
   }
 
   @override
-  Future<void> syncSchedulesToDatabase() async {
+  Future<int> syncSchedulesToDatabase() async {
     try {
       final user = supabaseClient.auth.currentUser;
       if (user == null) throw ServerException('User not logged in');
 
       final start = DateTime.now();
-      final end = start.add(const Duration(days: 60)); // Sync for next 60 days
+      final timePeriods = [];
 
-      final timePeriods = await remoteDataSource.getFreeBusy(start, end);
+      // Fetch 90 days in 30-day chunks to avoid "time range is too long" error
+      for (int i = 0; i < 3; i++) {
+        final chunkStart = start.add(Duration(days: i * 30));
+        final chunkEnd = chunkStart.add(const Duration(days: 30));
+
+        final chunkPeriods = await remoteDataSource.getFreeBusy(
+          chunkStart,
+          chunkEnd,
+        );
+        timePeriods.addAll(chunkPeriods);
+      }
 
       // Delete existing busy schedules for this user
       await supabaseClient
@@ -109,20 +125,24 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
           .delete()
           .eq('user_id', user.id);
 
-      if (timePeriods.isEmpty) return;
+      if (timePeriods.isEmpty) return 0;
 
       // Prepare data for bulk insert
-      final insertData = timePeriods.where((tp) => tp.start != null && tp.end != null).map((tp) {
-        return {
-          'user_id': user.id,
-          'start_time': tp.start!.toIso8601String(),
-          'end_time': tp.end!.toIso8601String(),
-        };
-      }).toList();
+      final insertData = timePeriods
+          .where((tp) => tp.start != null && tp.end != null)
+          .map((tp) {
+            return {
+              'user_id': user.id,
+              'start_time': tp.start!.toIso8601String(),
+              'end_time': tp.end!.toIso8601String(),
+            };
+          })
+          .toList();
 
       if (insertData.isNotEmpty) {
         await supabaseClient.from('user_availabilities').insert(insertData);
       }
+      return insertData.length;
     } catch (e) {
       throw ServerException('Gagal melakukan sinkronisasi kalender: $e');
     }

@@ -793,7 +793,11 @@ class _TripDetailPageState extends State<TripDetailPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push('/trip/${trip.id}/checklist');
+                    if (trip.startDate == null && trip.selectedDate == null) {
+                      context.push('/trip/${trip.id}/matching');
+                    } else {
+                      context.push('/trip/${trip.id}/checklist');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

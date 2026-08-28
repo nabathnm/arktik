@@ -21,5 +21,5 @@ abstract class GoogleCalendarRepository {
     required DateTime end,
   });
 
-  Future<void> syncSchedulesToDatabase();
+  Future<int> syncSchedulesToDatabase();
 }

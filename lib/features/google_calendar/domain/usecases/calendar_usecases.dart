@@ -46,7 +46,7 @@ class SyncSchedulesToDatabase {
 
   SyncSchedulesToDatabase(this.repository);
 
-  Future<void> call() async {
+  Future<int> call() async {
     return repository.syncSchedulesToDatabase();
   }
 }

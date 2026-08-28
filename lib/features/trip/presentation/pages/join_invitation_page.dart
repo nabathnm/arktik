@@ -28,14 +28,30 @@ class _JoinInvitationPageState extends State<JoinInvitationPage> {
 
     setState(() => _isValidating = true);
 
-    // Tampilkan popup untuk sinkronisasi kalender TERLEBIH DAHULU
+    // 1. Bergabung ke trip TERLEBIH DAHULU
+    final provider = context.read<InvitationProvider>();
+    final success = await provider.join(code);
+
+    setState(() => _isValidating = false);
+
+    if (!mounted) return;
+
+    if (!success) {
+      final error = provider.errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error ?? 'Gagal bergabung dengan invitation')),
+      );
+      return;
+    }
+
+    // 2. Setelah berhasil join, baru tampilkan popup sinkronisasi kalender
     final shouldSync = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Hubungkan Kalender?'),
         content: const Text(
-          'Agar kami dapat mencocokkan jadwal Anda dengan anggota trip lainnya secara akurat, izinkan kami mengimpor jadwal kosong Anda dari Google Calendar.',
+          'Agar kami dapat mencocokkan jadwal Anda dengan anggota trip lainnya secara akurat, izinkan kami mengimpor jadwal dari Google Calendar Anda.',
         ),
         actions: [
           TextButton(
@@ -50,42 +66,30 @@ class _JoinInvitationPageState extends State<JoinInvitationPage> {
       ),
     );
 
-    if (shouldSync == true && mounted) {
+    if (!mounted) return;
+
+    if (shouldSync == true) {
       try {
         await context.read<GoogleCalendarProvider>().syncSchedulesToDatabase();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kalender berhasil disinkronisasi!')),
+            const SnackBar(content: Text('Berhasil bergabung & kalender disinkronisasi!')),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal sinkronisasi kalender: $e')),
+            SnackBar(content: Text('Bergabung berhasil, tapi kalender gagal disinkronkan: $e')),
           );
         }
       }
-    }
-
-    if (!mounted) return;
-
-    final provider = context.read<InvitationProvider>();
-    final success = await provider.join(code);
-
-    setState(() => _isValidating = false);
-
-    if (success && mounted) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Berhasil bergabung dengan trip!')),
       );
-
-      context.go('/user/my-trips');
-    } else if (mounted) {
-      final error = provider.errorMessage;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error ?? 'Gagal bergabung dengan invitation')),
-      );
     }
+
+    context.go('/user/my-trips');
   }
 
   @override

@@ -71,12 +71,11 @@ class ScheduleMatchingRepositoryImpl implements ScheduleMatchingRepository {
             final eventStart = schedule['start']!;
             final eventEnd = schedule['end']!;
             
-            final eStart = DateTime(eventStart.year, eventStart.month, eventStart.day);
-            final eEnd = DateTime(eventEnd.year, eventEnd.month, eventEnd.day);
+            final startOfDay = currentDay;
+            final endOfDay = currentDay.add(const Duration(days: 1));
             
-            // Event mencakup hari ini
-            return (currentDay.isAtSameMomentAs(eStart) || currentDay.isAfter(eStart)) && 
-                   (currentDay.isAtSameMomentAs(eEnd) || currentDay.isBefore(eEnd));
+            // Event mencakup hari ini (Overlap: startA < endB && endA > startB)
+            return eventStart.isBefore(endOfDay) && eventEnd.isAfter(startOfDay);
           });
 
           isMemberFree = !isBusy;

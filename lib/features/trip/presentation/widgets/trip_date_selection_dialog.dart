@@ -27,7 +27,7 @@ class _TripDateSelectionDialogState extends State<TripDateSelectionDialog> {
       // Default search period: today to next 2 months
       provider.setSearchPeriod(
         DateTime.now(),
-        DateTime.now().add(const Duration(days: 60)),
+        DateTime.now().add(const Duration(days: 100)),
       );
       provider.findAvailableDates(widget.tripId);
     });

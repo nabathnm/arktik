@@ -30,19 +30,22 @@ class GoogleCalendarProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isConnected => _isConnected;
 
-  Future<void> syncSchedulesToDatabase() async {
+  Future<int> syncSchedulesToDatabase() async {
     _status = CalendarStateStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await _syncSchedules();
+      final syncedCount = await _syncSchedules();
       _isConnected = true;
       _status = CalendarStateStatus.loaded;
+      notifyListeners();
+      return syncedCount;
     } catch (e) {
       _handleError(e);
+      notifyListeners();
+      rethrow;
     }
-    notifyListeners();
   }
 
   Future<void> loadEvents() async {

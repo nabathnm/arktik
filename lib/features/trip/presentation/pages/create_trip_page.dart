@@ -51,17 +51,16 @@ class _CreateTripPageState extends State<CreateTripPage> {
 
       if (!mounted) return;
 
-      // Sinkronisasi kalender Google untuk leader setelah membuat trip
+      int syncedCount = 0;
       try {
-        await context.read<GoogleCalendarProvider>().syncSchedulesToDatabase();
-      } catch (_) {
+        syncedCount = await context.read<GoogleCalendarProvider>().syncSchedulesToDatabase();
+      } catch (e) {
         // Sync gagal tidak menghalangi pembuatan trip
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Trip dibuat, tapi sinkronisasi kalender gagal. Silakan coba sync manual.',
-              ),
+            SnackBar(
+              content: Text('Trip dibuat, tapi kalender gagal: $e'),
+              duration: const Duration(seconds: 10),
             ),
           );
         }
@@ -71,8 +70,8 @@ class _CreateTripPageState extends State<CreateTripPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Trip berhasil dibuat!')));
-      
+      ).showSnackBar(SnackBar(content: Text('Trip berhasil dibuat! Tersinkronisasi $syncedCount jadwal sibuk.')));
+
       final currentTrip = context.read<TripProvider>().currentTrip;
       if (currentTrip != null) {
         context.pushReplacement('/trip-share', extra: currentTrip);

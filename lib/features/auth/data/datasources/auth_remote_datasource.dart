@@ -74,6 +74,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'http://localhost:3000',
+        scopes:
+            'email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly',
+        queryParams: {
+          'prompt': 'consent',
+          'access_type': 'offline',
+        },
       );
       return;
     }
