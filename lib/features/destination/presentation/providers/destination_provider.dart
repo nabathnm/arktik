@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:rantau/features/destination/domain/repositories/destination_repository.dart';
+import 'package:arktik/features/destination/domain/repositories/destination_repository.dart';
 
 import '../../domain/entities/destination_entity.dart';
 

@@ -77,7 +77,7 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       case 'matching':
         return TripStatus.matching;
       case 'date_selected':
-        return TripStatus.date_selected;
+        return TripStatus.dateSelected;
       case 'completed':
         return TripStatus.completed;
       case 'cancelled':

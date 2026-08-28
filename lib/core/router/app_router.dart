@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/trip/domain/entities/trip_entity.dart';
-import 'package:rantau/features/destination/presentation/pages/eksplor_page.dart';
-import 'package:rantau/features/onboarding/presentation/pages/onboarding_page.dart';
-import 'package:rantau/main.dart';
+import 'package:arktik/features/destination/presentation/pages/eksplor_page.dart';
+import 'package:arktik/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:arktik/main.dart';
 import '../../features/google_calendar/presentation/pages/availability_calendar_page.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/pages/login_page.dart';

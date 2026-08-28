@@ -1,5 +1,5 @@
-import 'package:rantau/features/google_calendar/domain/entities/availability_entity.dart';
-import 'package:rantau/features/google_calendar/domain/repositories/google_calendar_repository.dart';
+import 'package:arktik/features/google_calendar/domain/entities/availability_entity.dart';
+import 'package:arktik/features/google_calendar/domain/repositories/google_calendar_repository.dart';
 
 class GetAvailability {
   final GoogleCalendarRepository repository;

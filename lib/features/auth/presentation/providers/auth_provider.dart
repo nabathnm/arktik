@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/observe_auth_state.dart';
 import '../../domain/usecases/sign_in_with_google.dart';
 import '../../domain/usecases/sign_out.dart';
@@ -9,7 +8,6 @@ import '../../domain/usecases/sign_out.dart';
 enum AuthStateStatus { initial, loading, authenticated, unauthenticated, error }
 
 class AuthProvider extends ChangeNotifier {
-  final GetCurrentUser _getCurrentUser;
   final SignInWithGoogle _signInWithGoogle;
   final SignOut _signOut;
   final ObserveAuthState _observeAuthState;
@@ -20,7 +18,6 @@ class AuthProvider extends ChangeNotifier {
   StreamSubscription<UserEntity?>? _authSubscription;
 
   AuthProvider({
-    required this._getCurrentUser,
     required this._signInWithGoogle,
     required this._signOut,
     required this._observeAuthState,

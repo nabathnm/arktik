@@ -1,90 +1,120 @@
-# Rantau
+<div align="center">
 
-Rantau is a Flutter-based mobile application designed as a digital platform to help users plan, manage, and execute their travel trips effectively. The application provides an integrated system for discovering destinations, organizing itineraries, managing trip members, and scheduling with Google Calendar. 
+  <img src="assets/images/splash/arktik.png" alt="Arktik logo" width="180" />
 
-The main features of Rantau include Destination discovery, Trip Management, and Google Calendar Integration. Users can browse various destinations, create detailed trips with start and end dates, invite other members to join their trip, and synchronize their travel itinerary directly to their Google Calendar. The application also provides user profile management and is built with a modular architecture integrated with Supabase for robust backend services.
+  <p align="center">
+    <img src="assets/images/applogo.png" alt="Arktik mockup" width="200" />
+  </p>
 
-## 📱 Features
+  # Arktik
 
-### 🔐 Authentication
-- User registration and login
-- Email and password authentication
-- Google Sign-In integration
-- Secure session management with Supabase
+  **Arktik is a Flutter-based mobile application designed to help users plan, manage, and execute their travel trips effectively with integrated Google Calendar scheduling.**
 
-### 🗺️ Destination (Explore)
-- Discover travel destinations
-- View detailed information about specific locations
-- Destination data fetched dynamically
+  <br />
 
-### 🧳 Trip Management
-- Create new trips (Start Date, End Date, Name)
-- Manage active and past trips
-- Add destinations to trips
-- **Trip Members**: Invite other users to join a trip using an invitation code
-- Role-based trip management (Leader & Member)
-- Track trip progress with a dynamic UI progress bar
+  ![Platform](https://img.shields.io/badge/Platform-Android-4A90E2?style=for-the-badge)
+  ![Platform](https://img.shields.io/badge/Platform-iOS-4A90E2?style=for-the-badge)
 
-### 📅 Google Calendar Integration
-- Sync trips and itineraries directly to user's Google Calendar
-- Request necessary OAuth scopes for Calendar access
-- Schedule management using Google APIs
+</div>
 
-### 👤 Profile Management
-- View user profile
-- Manage account details and avatar
+---
 
-## 🗃️ Project Structure
+## Table of contents
+
+- [Project overview](#project-overview)
+- [Key features](#key-features)
+- [Technology stack](#technology-stack)
+- [Project structure](#project-structure)
+- [Team](#team)
+
+## Project overview
+
+| Item | Details |
+| --- | --- |
+| Application Type | Cross-platform (Mobile) |
+| Primary Platform | Android / iOS |
+
+Arktik is a digital platform designed for travelers and groups who need an efficient way to organize their trips. By integrating destination discovery, itinerary planning, member management, and Google Calendar syncing, Arktik solves the hassle of scattered travel plans and ensures everyone involved stays on the same page.
+
+## Key features
+
+| Feature | What the user can do |
+| --- | --- |
+| Destination Discovery | Browse and explore various travel destinations seamlessly. |
+| Trip Management | Create and manage trips, including setting start and end dates, and organizing daily itineraries. |
+| Group Collaboration | Invite members to trips, manage roles (Leader/Member), and use invitation codes for easy joining. |
+| Google Calendar Integration | Automatically synchronize your travel itineraries and availability directly to Google Calendar. |
+| Trip Checklist | Keep track of essential items and tasks for the trip to ensure nothing is left behind. |
+
+
+## Technology stack
+
+| Category | Technology | Purpose |
+| --- | --- | --- |
+| Frontend | Flutter (Dart) | UI Framework for building cross-platform applications |
+| Architecture | Clean Architecture | Ensures separation of concerns and maintainable code |
+| State Management | Provider | Efficient and scalable state management for app features |
+| Backend | Supabase | Backend-as-a-Service providing secure and scalable infrastructure |
+| Database | PostgreSQL (Supabase) | Relational database for storing trips, members, and itineraries |
+| Authentication | Supabase Auth + Google OAuth | Secure user authentication and social login |
+| External API | Google Calendar API (`googleapis`) | Fetching user availability and syncing trip schedules |
+
+## Project structure
 
 ```text
-lib/
-├── core/
-│   ├── constants/         # App Colors, Typography, etc.
-│   ├── router/            # go_router configuration
-│   ├── widgets/           # Reusable global widgets
-│   └── ...
-│
-├── features/
-│   ├── auth/              # Authentication feature (Login/Register, Supabase Auth)
-│   ├── beranda/           # Home Dashboard feature
-│   ├── destination/       # Destination browsing & details
-│   ├── google_calendar/   # Google Calendar sync integration
-│   └── trip/              # Trip management (Create, My Trips, Members)
-│
-├── app.dart
-└── main.dart
+├── lib/
+│   ├── core/         # Core components (e.g., router, themes, widgets, constants)
+│   ├── features/     # Main features (auth, beranda, destination, google_calendar, profile, trip)
+│   │   ├── auth/     # Authentication feature (Login, Register)
+│   │   ├── trip/     # Trip management, creation, details, and checklist
+│   │   └── ...       # Other feature modules
+│   └── main.dart     # Entry point of the application
+├── assets/           # Images, icons, fonts, and static assets
+├── supabase/         # Database schemas and edge functions
+└── pubspec.yaml      # Project dependencies and configurations
 ```
 
-## ⚙️ Tech Stack
+## Getting Started
 
-### 🧩 Framework & Language
-- **Flutter**
-- **Dart**
+To get a local copy up and running, follow these simple steps.
 
-### 📦 State Management
-- **Provider** (`provider`)
+### Prerequisites
 
-### 🧭 Navigation
-- **go_router**
+*   Flutter SDK installed on your machine (version 3.12.2 or higher).
+*   An editor like VS Code or Android Studio.
+*   A Supabase project setup for backend services.
 
-### 🎨 UI & Utilities
-- **intl** (Date & string formatting)
-- **equatable** (Value equality for models)
-- **image_picker** (Camera & Gallery access)
-- **cupertino_icons**
+### Installation
 
-### ☁️ Backend as a Service
-- **Supabase** (Database, Authentication, Storage via `supabase_flutter`)
+1.  **Clone the repo**
+    ```sh
+    git clone https://github.com/[PROFILE]/[REPOSITORY].git
+    ```
+2.  **Navigate to the project directory**
+    ```sh
+    cd [DIRECTORY]
+    ```
+3.  **Setup Environment Variables**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+    ```env
+    SUPABASE_URL=your_supabase_url
+    SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+4.  **Install dependencies**
+    ```sh
+    flutter pub get
+    ```
+5.  **Run the app**
+    ```sh
+    flutter run
+    ```
 
-### 🌐 Networking & APIs
-- **http** (REST API integration)
-- **googleapis** & **extension_google_sign_in_as_googleapis_auth** (Google Calendar API)
+---
 
-### 🔐 Authentication
-- **Supabase Auth** (Email & Password)
-- **Google Sign-In** (OAuth 2.0 via `google_sign_in`)
+## Team
 
-### ⚙️ Infrastructure & Configuration
-- **flutter_dotenv** (Environment variable management)
-- **flutter_native_splash** (Splash screen generation)
-- **flutter_launcher_icons** (App icon generation)
+| Name | Role | Responsibilities | Contact |
+| --- | --- | --- | --- |
+| [FULL_NAME] | Product Manager | Overseeing project requirements and timeline | [GitHub / LinkedIn] |
+| [FULL_NAME] | UI/UX Designer | Designing application interfaces and user flows | [GitHub / LinkedIn] |
+| [FULL_NAME] | Mobile Engineer | Developing the Flutter application and integration | [GitHub / LinkedIn] |

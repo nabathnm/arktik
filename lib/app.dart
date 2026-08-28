@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rantau/main.dart';
+import 'package:arktik/main.dart';
 import 'core/router/app_router.dart';
 import 'core/constants/app_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';

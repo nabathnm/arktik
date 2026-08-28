@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:rantau/features/destination/domain/repositories/destination_repository.dart';
+import 'package:arktik/features/destination/domain/repositories/destination_repository.dart';
 import '../entities/destination_entity.dart';
 
 class CreateDestination {

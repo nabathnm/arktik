@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:rantau/features/google_calendar/domain/entities/availability_entity.dart';
-import 'package:rantau/features/google_calendar/domain/usecases/get_availability.dart';
+import 'package:arktik/features/google_calendar/domain/entities/availability_entity.dart';
+import 'package:arktik/features/google_calendar/domain/usecases/get_availability.dart';
 
 enum AvailabilityState { initial, loading, loaded, empty, error }
 

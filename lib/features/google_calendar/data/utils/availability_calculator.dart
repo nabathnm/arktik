@@ -1,4 +1,4 @@
-import 'package:rantau/features/google_calendar/domain/entities/availability_entity.dart';
+import 'package:arktik/features/google_calendar/domain/entities/availability_entity.dart';
 
 class AvailabilityCalculator {
   /// Mengubah list dari start/end periods (Busy) menjadi Availability list (FREE/BUSY)

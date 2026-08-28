@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rantau/core/constants/app_colors.dart';
+import 'package:arktik/core/constants/app_colors.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../providers/trip_provider.dart';
 import '../../../destination/presentation/providers/destination_provider.dart';

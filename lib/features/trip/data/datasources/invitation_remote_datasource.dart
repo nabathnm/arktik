@@ -75,7 +75,7 @@ class InvitationRemoteDataSourceImpl implements InvitationRemoteDataSource {
     final normalizedCode = code.trim().toUpperCase();
 
     // Call the RPC function (Runs as SECURITY DEFINER to bypass RLS)
-    final response = await supabase.rpc(
+    await supabase.rpc(
       'join_trip_with_code',
       params: {'p_code': normalizedCode},
     );

@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum TripType { solo, group, family }
 
-enum TripStatus { draft, matching, date_selected, planning, active, completed, cancelled }
+enum TripStatus { draft, matching, dateSelected, planning, active, completed, cancelled }
 
 class TripEntity extends Equatable {
   final String id;

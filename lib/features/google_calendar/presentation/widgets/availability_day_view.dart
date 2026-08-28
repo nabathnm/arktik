@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rantau/features/google_calendar/domain/entities/availability_entity.dart';
+import 'package:arktik/features/google_calendar/domain/entities/availability_entity.dart';
 import 'availability_time_slot.dart';
 
 class AvailabilityDayView extends StatelessWidget {

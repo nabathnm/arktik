@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rantau/features/google_calendar/domain/entities/availability_entity.dart';
-import 'package:rantau/features/google_calendar/data/utils/availability_calculator.dart';
+import 'package:arktik/features/google_calendar/domain/entities/availability_entity.dart';
+import 'package:arktik/features/google_calendar/data/utils/availability_calculator.dart';
 
 void main() {
   group('AvailabilityCalculator Tests', () {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:rantau/main.dart';
+import 'package:arktik/main.dart';
 import '../providers/availability_provider.dart';
 import '../widgets/custom_grid_calendar.dart';
 import '../widgets/availability_day_view.dart';

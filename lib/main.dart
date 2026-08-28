@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:rantau/features/destination/domain/usecases/get_all_destinations.dart';
+import 'package:arktik/features/destination/domain/usecases/get_all_destinations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
@@ -163,7 +163,6 @@ class Config {
     observeAuthState = ObserveAuthState(authRepository);
 
     authProvider = AuthProvider(
-      getCurrentUser: getCurrentUser,
       signInWithGoogle: signInWithGoogle,
       signOut: signOut,
       observeAuthState: observeAuthState,
@@ -298,7 +297,7 @@ void main() async {
   // Initialize Supabase
   await Supabase.initialize(
     url: EnvConstants.supabaseUrl,
-    anonKey: EnvConstants.supabaseAnonKey,
+    publishableKey: EnvConstants.supabaseAnonKey,
   );
 
   // Initialize Dependency Config

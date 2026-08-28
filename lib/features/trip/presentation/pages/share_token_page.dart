@@ -45,6 +45,7 @@ class _ShareTokenPageState extends State<ShareTokenPage> {
         }
       } else {
         // Create new
+        if (!mounted) return;
         final success = await context.read<InvitationProvider>().createNewInvitation(
               maxMembers: 20, // generous default
               expiresAt: DateTime.now().add(const Duration(days: 30)),

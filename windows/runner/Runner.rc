@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "rantau" "\0"
+            VALUE "FileDescription", "arktik" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "rantau" "\0"
+            VALUE "InternalName", "arktik" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "rantau.exe" "\0"
-            VALUE "ProductName", "rantau" "\0"
+            VALUE "OriginalFilename", "arktik.exe" "\0"
+            VALUE "ProductName", "arktik" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

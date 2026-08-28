@@ -54,7 +54,6 @@ class _MyTripsPageState extends State<MyTripsPage>
             );
           }
           final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
 
           final groupedActive = <DateTime, List<TripSummaryEntity>>{};
           final groupedPast = <DateTime, List<TripSummaryEntity>>{};

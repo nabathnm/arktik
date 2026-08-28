@@ -65,16 +65,17 @@ class InvitationProvider extends ChangeNotifier {
     if (e is PostgrestException) {
       if (e.message.contains('InvitationNotFound')) {
         msg = 'Invitation code tidak ditemukan';
-      } else if (e.message.contains('InvitationExpired'))
+      } else if (e.message.contains('InvitationExpired')) {
         msg = 'Invitation sudah expired';
-      else if (e.message.contains('InvitationClosed'))
+      } else if (e.message.contains('InvitationClosed')) {
         msg = 'Invitation sudah ditutup';
-      else if (e.message.contains('InvitationFull'))
+      } else if (e.message.contains('InvitationFull')) {
         msg = 'Kapasitas invitation sudah penuh';
-      else if (e.message.contains('AlreadyJoined'))
+      } else if (e.message.contains('AlreadyJoined')) {
         msg = 'Kamu sudah bergabung';
-      else
+      } else {
         msg = e.message;
+      }
     } else if (e is Exception) {
       msg = e.toString().replaceAll('Exception: ', '');
     }

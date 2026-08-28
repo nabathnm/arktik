@@ -47,7 +47,6 @@ class _TripDetailPageState extends State<TripDetailPage> {
           }
 
           final trip = provider.currentTrip!;
-          final isLeader = provider.myMembership?.role == TripMemberRole.owner;
           final dateFormat = DateFormat('dd MMM yyyy');
 
           // Calculate trip duration

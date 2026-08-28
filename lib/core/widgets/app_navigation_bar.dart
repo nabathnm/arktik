@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:rantau/core/constants/app_colors.dart';
-import 'package:rantau/core/constants/app_typography.dart';
+import 'package:arktik/core/constants/app_colors.dart';
+import 'package:arktik/core/constants/app_typography.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
