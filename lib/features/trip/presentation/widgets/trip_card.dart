@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/trip_summary_entity.dart';
-import '../../domain/entities/trip_member_entity.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
 
 class TripCard extends StatelessWidget {
   final TripSummaryEntity trip;
@@ -37,7 +35,7 @@ class TripCard extends StatelessWidget {
     final isCompleted = progress == 1.0;
     final progressColor = isCompleted
         ? Colors.green.shade200
-        : AppColors.primary.withOpacity(0.5);
+        : AppColors.primary.withValues(alpha: 0.5);
 
     return GestureDetector(
       onTap: onTap,
@@ -100,7 +98,7 @@ class TripCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.lightBlue.withOpacity(0.5),
+                          color: Colors.lightBlue.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

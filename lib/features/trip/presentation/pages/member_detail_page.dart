@@ -62,7 +62,7 @@ class MemberDetailPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isLeader
-                    ? AppColors.primary.withOpacity(0.1)
+                    ? AppColors.primary.withValues(alpha: 0.1)
                     : AppColors.neutralLightActive,
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -91,7 +91,7 @@ class MemberDetailPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => _confirmRemove(context, provider, member),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error.withOpacity(0.1),
+                    backgroundColor: AppColors.error.withValues(alpha: 0.1),
                     foregroundColor: AppColors.error,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -108,7 +108,7 @@ class MemberDetailPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => _confirmLeave(context, provider),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error.withOpacity(0.1),
+                    backgroundColor: AppColors.error.withValues(alpha: 0.1),
                     foregroundColor: AppColors.error,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16),

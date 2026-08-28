@@ -36,6 +36,7 @@ class DestinationRepositoryImpl implements DestinationRepository {
   }
 
   // ADMIN
+  @override
   Future<List<DestinationEntity>> getAdminDestinations() async {
     try {
       return await destinationRemoteDatasource.getAllDestinations();
@@ -45,6 +46,7 @@ class DestinationRepositoryImpl implements DestinationRepository {
   }
 
   /// Membuat destinasi baru
+  @override
   Future<DestinationEntity> createDestination({
     required String name,
     required String description,
@@ -70,6 +72,7 @@ class DestinationRepositoryImpl implements DestinationRepository {
   }
 
   /// Update destinasi
+  @override
   Future<DestinationEntity> updateDestination(
     DestinationEntity destination,
   ) async {
@@ -81,6 +84,7 @@ class DestinationRepositoryImpl implements DestinationRepository {
   }
 
   /// Menghapus destinasi
+  @override
   Future<void> deleteDestination(String destinationId) async {
     try {
       await destinationRemoteDatasource.deleteDestination(destinationId);

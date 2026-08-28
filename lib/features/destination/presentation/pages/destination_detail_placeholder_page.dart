@@ -60,7 +60,7 @@ class DestinationDetailPlaceholderPage extends StatelessWidget {
                         width: 48,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.9),
+                          color: AppColors.primary.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(

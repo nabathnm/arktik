@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/widgets/app_error.dart';
 import '../../../../core/widgets/app_loading.dart';
@@ -147,7 +146,7 @@ class _ScheduleMatchingPageState extends State<ScheduleMatchingPage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -572,7 +571,7 @@ class _CustomMockCalendarState extends State<_CustomMockCalendar> {
                   margin: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? Colors.blue : isInRange ? Colors.blue.withOpacity(0.2) : Colors.transparent,
+                    color: isSelected ? Colors.blue : isInRange ? Colors.blue.withValues(alpha: 0.2) : Colors.transparent,
                     border: isClash ? Border.all(color: Colors.red.shade300) : null,
                   ),
                   child: Center(

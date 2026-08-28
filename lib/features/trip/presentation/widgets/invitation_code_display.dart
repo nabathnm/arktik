@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 class InvitationCodeDisplay extends StatelessWidget {
   final String code;
 
-  const InvitationCodeDisplay({Key? key, required this.code}) : super(key: key);
+  const InvitationCodeDisplay({super.key, required this.code});
 
   void _copyToClipboard(BuildContext context) async {
     final rawCode = code.length >= 6 ? code.substring(0, 6).toUpperCase() : code.toUpperCase();

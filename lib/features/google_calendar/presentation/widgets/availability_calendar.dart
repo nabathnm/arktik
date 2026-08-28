@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/availability_provider.dart';
 
 class AvailabilityCalendar extends StatelessWidget {
-  const AvailabilityCalendar({Key? key}) : super(key: key);
+  const AvailabilityCalendar({super.key});
 
   @override
   Widget build(BuildContext context) {

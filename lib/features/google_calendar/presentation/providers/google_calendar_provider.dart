@@ -18,16 +18,12 @@ class GoogleCalendarProvider extends ChangeNotifier {
   bool _isConnected = false;
 
   GoogleCalendarProvider({
-    required GetCalendarEvents getEvents,
-    required CreateCalendarEvent createEvent,
-    required UpdateCalendarEvent updateEvent,
-    required DeleteCalendarEvent deleteEvent,
-    required SyncSchedulesToDatabase syncSchedules,
-  })  : _getEvents = getEvents,
-        _createEvent = createEvent,
-        _updateEvent = updateEvent,
-        _deleteEvent = deleteEvent,
-        _syncSchedules = syncSchedules;
+    required this._getEvents,
+    required this._createEvent,
+    required this._updateEvent,
+    required this._deleteEvent,
+    required this._syncSchedules,
+  });
 
   CalendarStateStatus get status => _status;
   List<CalendarEventEntity> get events => _events;

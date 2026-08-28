@@ -7,10 +7,10 @@ class AvailabilityDayView extends StatelessWidget {
   final bool isLoading;
 
   const AvailabilityDayView({
-    Key? key,
+    super.key,
     required this.slots,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class AvailabilityDayView extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 8.0),
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),

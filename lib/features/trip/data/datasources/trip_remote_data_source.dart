@@ -414,8 +414,9 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
       DestinationEntity? destination;
       if (destData != null) {
         DestinationType parsedType = DestinationType.tourism;
-        if (destData['type'] == 'culinary')
+        if (destData['type'] == 'culinary') {
           parsedType = DestinationType.culinary;
+        }
 
         destination = DestinationEntity(
           id: destData['id'],
@@ -520,9 +521,15 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
 
   @override
   Future<void> updateTripChecklist(String tripId, List<bool> checklist) async {
+    final bool allDone = checklist.every((e) => e == true);
+    final updates = <String, dynamic>{'checklist_status': checklist};
+    if (allDone) {
+      updates['status'] = 'completed';
+    }
+
     await supabaseClient
         .from('trips')
-        .update({'checklist_status': checklist})
+        .update(updates)
         .eq('id', tripId);
   }
 }

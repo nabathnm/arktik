@@ -31,6 +31,30 @@ class TripSummaryEntity extends Equatable {
     this.invitationCode,
   });
 
+  int get duration {
+    if (startDate != null && endDate != null) {
+      return endDate!.difference(startDate!).inDays + 1;
+    }
+    return 0;
+  }
+
+  double get progress {
+    if (startDate == null || endDate == null) return 0.0;
+    
+    final now = DateTime.now();
+    if (now.isAfter(endDate!) || now.isAtSameMomentAs(endDate!)) {
+      return 1.0;
+    } else if (now.isAfter(startDate!)) {
+      final totalDuration = duration;
+      return totalDuration > 0
+          ? now.difference(startDate!).inDays / totalDuration
+          : 0.0;
+    }
+    return 0.0;
+  }
+  
+  int get progressPercent => (progress.clamp(0.0, 1.0) * 100).toInt();
+
   @override
   List<Object?> get props => [
     id,

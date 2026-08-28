@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:rantau/core/constants/app_colors.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../providers/trip_provider.dart';
-import '../../../destination/domain/entities/destination_entity.dart';
 import '../../../destination/presentation/providers/destination_provider.dart';
 import '../../../google_calendar/presentation/providers/google_calendar_provider.dart';
 

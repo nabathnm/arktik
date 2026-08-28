@@ -5,7 +5,6 @@ import 'package:rantau/features/destination/presentation/pages/eksplor_page.dart
 import 'package:rantau/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:rantau/main.dart';
 import '../../features/google_calendar/presentation/pages/availability_calendar_page.dart';
-import 'package:provider/provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -25,6 +24,7 @@ import '../../features/trip/presentation/pages/trip_members_page.dart';
 import '../../features/trip/presentation/pages/member_detail_page.dart';
 import '../../features/trip/presentation/pages/schedule_matching_page.dart';
 import '../../features/trip/presentation/pages/trip_checklist_page.dart';
+import '../../features/trip/presentation/pages/trip_checklist_success_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 
 class AppRouter {
@@ -169,6 +169,13 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['tripId']!;
           return TripChecklistPage(tripId: id);
+        },
+      ),
+      GoRoute(
+        path: '/trip/:tripId/checklist/success',
+        builder: (context, state) {
+          final id = state.pathParameters['tripId']!;
+          return TripChecklistSuccessPage(tripId: id);
         },
       ),
       GoRoute(

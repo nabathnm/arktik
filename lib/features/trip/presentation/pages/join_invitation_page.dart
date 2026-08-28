@@ -6,7 +6,7 @@ import 'invitation_provider.dart';
 import '../../../google_calendar/presentation/providers/google_calendar_provider.dart';
 
 class JoinInvitationPage extends StatefulWidget {
-  const JoinInvitationPage({Key? key}) : super(key: key);
+  const JoinInvitationPage({super.key});
 
   @override
   State<JoinInvitationPage> createState() => _JoinInvitationPageState();

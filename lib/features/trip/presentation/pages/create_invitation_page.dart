@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'invitation_provider.dart';
 
 class CreateInvitationPage extends StatefulWidget {
-  const CreateInvitationPage({Key? key}) : super(key: key);
+  const CreateInvitationPage({super.key});
 
   @override
   State<CreateInvitationPage> createState() => _CreateInvitationPageState();

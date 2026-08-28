@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 class AvailabilityTimeSlot extends StatelessWidget {
   final AvailabilityEntity entity;
 
-  const AvailabilityTimeSlot({Key? key, required this.entity}) : super(key: key);
+  const AvailabilityTimeSlot({super.key, required this.entity});
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +18,10 @@ class AvailabilityTimeSlot extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: isFree ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isFree ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8.0),
         border: Border.all(
-          color: isFree ? Colors.green.withOpacity(0.5) : Colors.red.withOpacity(0.5),
+          color: isFree ? Colors.green.withValues(alpha: 0.5) : Colors.red.withValues(alpha: 0.5),
         ),
       ),
       child: Row(

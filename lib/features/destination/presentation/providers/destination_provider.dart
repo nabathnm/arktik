@@ -19,8 +19,7 @@ enum DestinationState {
 class DestinationProvider extends ChangeNotifier {
   final DestinationRepository _repository;
 
-  DestinationProvider({required DestinationRepository repository})
-    : _repository = repository;
+  DestinationProvider({required this._repository});
 
   // ============================================================
   // STATE

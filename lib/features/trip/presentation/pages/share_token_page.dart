@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/services.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../widgets/invitation_code_display.dart';
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../providers/schedule_matching_provider.dart';
 import '../providers/trip_provider.dart';
 
@@ -408,7 +407,7 @@ class _CustomMockCalendarState extends State<_CustomMockCalendar> {
                     color: isSelected
                         ? Colors.blue
                         : isInRange
-                        ? Colors.blue.withOpacity(0.2)
+                        ? Colors.blue.withValues(alpha: 0.2)
                         : Colors.transparent,
                   ),
                   child: Column(

@@ -63,9 +63,9 @@ class InvitationProvider extends ChangeNotifier {
   void _mapExceptionToMessage(Object e) {
     String msg = 'An unexpected error occurred';
     if (e is PostgrestException) {
-      if (e.message.contains('InvitationNotFound'))
+      if (e.message.contains('InvitationNotFound')) {
         msg = 'Invitation code tidak ditemukan';
-      else if (e.message.contains('InvitationExpired'))
+      } else if (e.message.contains('InvitationExpired'))
         msg = 'Invitation sudah expired';
       else if (e.message.contains('InvitationClosed'))
         msg = 'Invitation sudah ditutup';

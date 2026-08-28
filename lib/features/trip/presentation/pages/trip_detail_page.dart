@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/widgets/app_error.dart';
 import '../../../../core/widgets/app_loading.dart';
 import 'package:intl/intl.dart';
 import '../providers/trip_provider.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../../domain/entities/trip_member_entity.dart';
-import '../../domain/entities/trip_summary_entity.dart';
-import '../widgets/trip_date_selection_dialog.dart';
 
 class TripDetailPage extends StatefulWidget {
   final String tripId;
@@ -33,6 +30,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.white,
       body: Consumer<TripProvider>(
         builder: (context, provider, child) {
@@ -169,129 +167,127 @@ class _TripDetailPageState extends State<TripDetailPage> {
 
                       // Info Card
                       InkWell(
-                        onTap: () => context.push('/trip/${widget.tripId}/checklist'),
                         child: Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Left Image
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                "https://picsum.photos/seed/${trip.id}/200",
-                                width: 90,
-                                height: 140,
-                                fit: BoxFit.fill,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Right Content
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    trip.name,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                            ],
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Left Image
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  "https://picsum.photos/seed/${trip.id}/200",
+                                  width: 90,
+                                  height: 140,
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              // Right Content
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      trip.name,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        'Tujuan Negara: ',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: AppColors.textSecondary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      const Text(
-                                        'Indonesia',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      InkWell(
-                                        onTap: () => context.push(
-                                          '/trip/${widget.tripId}/members',
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Tujuan Negara: ',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF26225B),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          'Indonesia',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: () => context.push(
+                                            '/trip/${widget.tripId}/members',
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF26225B),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: const Text(
+                                              'Detail Peserta',
+                                              style: TextStyle(
+                                                color: AppColors.yellowNormal,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
-                                          child: const Text(
-                                            'Detail Peserta',
-                                            style: TextStyle(
-                                              color: AppColors.yellowNormal,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Icon(Icons.people, size: 22),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${provider.members.length}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 22),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${provider.members.length}',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    trip.startDate != null &&
-                                            trip.endDate != null
-                                        ? '${dateFormat.format(trip.startDate!)} — ${dateFormat.format(trip.endDate!)}'
-                                        : 'Tanggal belum ditentukan',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      trip.startDate != null &&
+                                              trip.endDate != null
+                                          ? '${dateFormat.format(trip.startDate!)} — ${dateFormat.format(trip.endDate!)}'
+                                          : 'Tanggal belum ditentukan',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
                       ),
 
                       if (trip.startDate == null || trip.endDate == null) ...[
@@ -492,8 +488,9 @@ class _TripDetailPageState extends State<TripDetailPage> {
                                         it.visitDate.day == currentDate.day;
                                   }).toList()..sort((a, b) {
                                     if (a.startTime == null &&
-                                        b.startTime == null)
+                                        b.startTime == null) {
                                       return 0;
+                                    }
                                     if (a.startTime == null) return 1;
                                     if (b.startTime == null) return -1;
                                     final aTime =
@@ -780,6 +777,43 @@ class _TripDetailPageState extends State<TripDetailPage> {
                   ),
                 ),
               ],
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: Consumer<TripProvider>(
+        builder: (context, provider, child) {
+          if (provider.currentTrip == null) return const SizedBox.shrink();
+          final trip = provider.currentTrip!;
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: const BoxDecoration(color: Colors.transparent),
+            child: SafeArea(
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.push('/trip/${trip.id}/checklist');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Mulai Trip',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
             ),
           );
         },

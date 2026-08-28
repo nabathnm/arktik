@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:rantau/features/trip/presentation/pages/invitation_provider.dart';
-import 'package:rantau/features/trip/domain/usecases/join_invitation.dart';
 
 void main() {
   group('Invitation Error Mapping Tests', () {
@@ -15,8 +13,9 @@ void main() {
       // Simulate error mapping directly (for testing purposes, we instantiate dummy provider or test logic directly)
       String mapException(Object err) {
         if (err is PostgrestException) {
-          if (err.message.contains('InvitationNotFound'))
+          if (err.message.contains('InvitationNotFound')) {
             return 'Invitation code tidak ditemukan';
+          }
         }
         return 'Error';
       }
@@ -33,8 +32,9 @@ void main() {
 
       String mapException(Object err) {
         if (err is PostgrestException) {
-          if (err.message.contains('InvitationExpired'))
+          if (err.message.contains('InvitationExpired')) {
             return 'Invitation sudah expired';
+          }
         }
         return 'Error';
       }

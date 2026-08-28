@@ -1,7 +1,6 @@
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:flutter/foundation.dart';
 
 abstract class GoogleCalendarRemoteDataSource {
   Future<List<calendar.Event>> getEvents();
@@ -133,8 +132,9 @@ class GoogleCalendarRemoteDataSourceImpl
   @override
   Future<calendar.Event> updateEvent(calendar.Event event) async {
     final api = await _getCalendarApi();
-    if (event.id == null)
+    if (event.id == null) {
       throw Exception('Event ID cannot be null for update.');
+    }
     return await api.events.update(event, 'primary', event.id!);
   }
 

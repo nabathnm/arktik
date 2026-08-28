@@ -1,13 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:collection/collection.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 
 import '../../domain/entities/candidate_date_entity.dart';
 import '../../domain/repositories/schedule_matching_repository.dart';
 import '../../domain/repositories/trip_repository.dart';
 import '../../../google_calendar/domain/repositories/google_calendar_repository.dart';
-import '../../../google_calendar/domain/entities/availability_entity.dart';
 
 class ScheduleMatchingRepositoryImpl implements ScheduleMatchingRepository {
   final SupabaseClient supabaseClient;

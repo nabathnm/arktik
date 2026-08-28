@@ -71,17 +71,9 @@ class _TripChecklistPageState extends State<TripChecklistPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Assuming there is an Arktik logo in assets or we can just use text
-            // Image.asset('assets/arktik_logo.png', height: 30),
-            const Text(
-              'Arktik',
-              style: TextStyle(
-                color: Color(0xFF26225B),
-                fontSize: 24,
-                fontFamily: 'Cursive', // Or appropriate font
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Image.asset('assets/images/splash/bird.png', height: 32),
+            const SizedBox(width: 4),
+            Image.asset('assets/images/icon/arktik_black.png', height: 32),
           ],
         ),
         centerTitle: true,
@@ -138,13 +130,17 @@ class _TripChecklistPageState extends State<TripChecklistPage> {
                   },
                 ),
               ),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => context.pop(),
+                  onPressed: _checklistState.every((element) => element == true) 
+                      ? () => context.push('/trip/${widget.tripId}/checklist/success') 
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF26225B),
+                    disabledBackgroundColor: Colors.grey.shade300,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),

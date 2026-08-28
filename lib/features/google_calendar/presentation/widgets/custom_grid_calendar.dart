@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/availability_provider.dart';
 
 class CustomGridCalendar extends StatelessWidget {
-  const CustomGridCalendar({Key? key}) : super(key: key);
+  const CustomGridCalendar({super.key});
 
   @override
   Widget build(BuildContext context) {

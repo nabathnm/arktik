@@ -205,6 +205,8 @@ class TripProvider extends ChangeNotifier {
   Future<void> updateChecklist(String tripId, List<bool> newChecklist) async {
     if (_currentTrip == null || _currentTrip!.id != tripId) return;
 
+    final bool allDone = newChecklist.every((e) => e == true);
+
     // Optimistically update the UI
     final oldTrip = _currentTrip!;
     _currentTrip = TripEntity(
@@ -215,7 +217,7 @@ class TripProvider extends ChangeNotifier {
       endDate: oldTrip.endDate,
       selectedDate: oldTrip.selectedDate,
       type: oldTrip.type,
-      status: oldTrip.status,
+      status: allDone ? TripStatus.completed : oldTrip.status,
       createdBy: oldTrip.createdBy,
       createdAt: oldTrip.createdAt,
       checklistStatus: newChecklist,

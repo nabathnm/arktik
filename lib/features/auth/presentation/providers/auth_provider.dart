@@ -20,14 +20,11 @@ class AuthProvider extends ChangeNotifier {
   StreamSubscription<UserEntity?>? _authSubscription;
 
   AuthProvider({
-    required GetCurrentUser getCurrentUser,
-    required SignInWithGoogle signInWithGoogle,
-    required SignOut signOut,
-    required ObserveAuthState observeAuthState,
-  })  : _getCurrentUser = getCurrentUser,
-        _signInWithGoogle = signInWithGoogle,
-        _signOut = signOut,
-        _observeAuthState = observeAuthState {
+    required this._getCurrentUser,
+    required this._signInWithGoogle,
+    required this._signOut,
+    required this._observeAuthState,
+  }) {
     _init();
   }
 

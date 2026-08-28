@@ -7,7 +7,7 @@ import '../widgets/custom_grid_calendar.dart';
 import '../widgets/availability_day_view.dart';
 
 class AvailabilityCalendarPage extends StatefulWidget {
-  const AvailabilityCalendarPage({Key? key}) : super(key: key);
+  const AvailabilityCalendarPage({super.key});
 
   @override
   State<AvailabilityCalendarPage> createState() =>
@@ -25,7 +25,7 @@ class _AvailabilityCalendarPageState extends State<AvailabilityCalendarPage> {
 }
 
 class _AvailabilityCalendarView extends StatelessWidget {
-  const _AvailabilityCalendarView({Key? key}) : super(key: key);
+  const _AvailabilityCalendarView();
 
   @override
   Widget build(BuildContext context) {
