@@ -1,9 +1,9 @@
 <div align="center">
 
-  <img src="assets/images/splash/arktik.png" alt="Arktik logo" width="180" />
+  <img src="assets/images/applogo.png" alt="Arktik logo" width="180" />
 
   <p align="center">
-    <img src="assets/images/applogo.png" alt="Arktik mockup" width="200" />
+    <img src="assets/images/mock.png" alt="Arktik mockup" width="200" />
   </p>
 
   # Arktik
