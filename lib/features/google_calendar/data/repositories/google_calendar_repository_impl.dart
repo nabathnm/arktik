@@ -107,7 +107,6 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
       final start = DateTime.now();
       final timePeriods = [];
 
-      // Fetch 90 days in 30-day chunks to avoid "time range is too long" error
       for (int i = 0; i < 3; i++) {
         final chunkStart = start.add(Duration(days: i * 30));
         final chunkEnd = chunkStart.add(const Duration(days: 30));
@@ -119,7 +118,6 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
         timePeriods.addAll(chunkPeriods);
       }
 
-      // Delete existing busy schedules for this user
       await supabaseClient
           .from('user_availabilities')
           .delete()
@@ -127,7 +125,6 @@ class GoogleCalendarRepositoryImpl implements GoogleCalendarRepository {
 
       if (timePeriods.isEmpty) return 0;
 
-      // Prepare data for bulk insert
       final insertData = timePeriods
           .where((tp) => tp.start != null && tp.end != null)
           .map((tp) {

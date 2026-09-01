@@ -69,8 +69,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signInWithGoogle() async {
     if (kIsWeb) {
-      // Pada Web, Google Identity Services (GIS) tidak mengembalikan idToken jika dipanggil melalui tombol kustom.
-      // Oleh karena itu, kita gunakan bawaan Supabase OAuth untuk Web.
       await supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'http://localhost:3000',
@@ -84,7 +82,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return;
     }
 
-    // Untuk Mobile (Android/iOS), gunakan Google Sign In native
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
@@ -103,7 +100,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception('No ID Token found.');
     }
 
-    // Login ke Supabase dengan token yang didapat dari native OS
     await supabaseClient.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,

@@ -77,7 +77,7 @@ class _TripChecklistPageState extends State<TripChecklistPage> {
           ],
         ),
         centerTitle: true,
-        actions: const [SizedBox(width: 48)], // Balance the leading icon
+        actions: const [SizedBox(width: 48)],
       ),
       body: SafeArea(
         child: Padding(

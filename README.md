@@ -132,6 +132,6 @@ To get a local copy up and running, follow these simple steps.
 
 | Name | Role | Responsibilities | Contact |
 | --- | --- | --- | --- |
-| Shelfina Khayla Anindita | Product Manager | Overseeing project requirements and timeline | linkedin.com/in/nabath-nuur |
+| Shelfina Khayla Anindita | Product Manager | Overseeing project requirements and timeline | linkedin.com/in/shelfina-khayla-anindita |
 | Naufaldo Dafa Zaki Bastian | UI/UX Designer | Designing application interfaces and user flows | linkedin.com/in/naufaldo-dafa-zb |
-| Nabath Nur Muhammad | Mobile Engineer | Developing the Flutter application and integration | linkedin.com/in/shelfina-khayla-anindita |
+| Nabath Nur Muhammad | Mobile Engineer | Developing the Flutter application and integration | linkedin.com/in/nabath-nuur |
